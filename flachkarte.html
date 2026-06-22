@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flache Weltkarte — Das Internet als leuchtendes Netz</title>
+<style>
+  :root{ --text:#eaf0ff; --muted:#94a3c8; --cy:#46e0c0; --gold:#ffcf66; }
+  *{box-sizing:border-box}
+  html,body{margin:0; background:#03060f; color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+  header{text-align:center; padding:26px 20px 10px}
+  header h1{margin:0 0 6px; font-size:clamp(22px,3.4vw,36px);
+    background:linear-gradient(90deg,#7fe9ff,#9affd1); -webkit-background-clip:text; background-clip:text; color:transparent}
+  header p{margin:0 auto; color:var(--muted); max-width:680px; font-size:15px}
+
+  .stage{position:relative; width:100%; margin:0 auto;}
+  canvas{display:block; width:100%; height:auto}
+
+  .legend{display:flex; flex-wrap:wrap; gap:22px; justify-content:center;
+    color:var(--muted); font-size:14px; margin:14px auto; padding:0 18px}
+  .legend span{display:inline-flex; align-items:center; gap:8px}
+  .d{width:12px;height:12px;border-radius:50%}
+  .d.g{background:var(--gold); box-shadow:0 0 8px var(--gold)}
+  .d.c{background:var(--cy); box-shadow:0 0 8px var(--cy)}
+  .d.l{width:18px;height:10px;border-radius:3px;background:#2b6bd6;opacity:.7}
+  footer{text-align:center; color:var(--muted); font-size:13px; padding:14px 20px 34px}
+</style>
+</head>
+<body>
+<nav id="atlasnav" style="position:sticky;top:0;z-index:99999;display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;background:#070d18;border-bottom:1px solid #1b2742;font-family:system-ui,-apple-system,sans-serif;font-size:13px"><a href="index.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">📊 Übersicht</a><a href="aufbau.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">📖 Aufbau</a><a href="weltkarte.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">🗺️ Weltkarte</a><a href="globus.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">🌍 Globus</a><a href="flachkarte.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">🛰️ Flache Karte</a></nav>
+
+
+<header>
+  <h1>🗺️ Das Internet auf der flachen Weltkarte</h1>
+  <p>Große Karte: die leuchtenden Bögen sind die Haupt-Leitungen zwischen den Knotenpunkten, die wandernden Lichter sind die fließenden Daten.</p>
+</header>
+
+<div class="stage"><canvas id="map"></canvas></div>
+
+<div class="legend">
+  <span><i class="d g"></i> Knotenpunkt (Stadt mit Rechenzentren)</span>
+  <span><i class="d c"></i> wandernde Daten</span>
+  <span><i class="d l"></i> Landmasse (aus Lichtpunkten)</span>
+</div>
+
+<footer>Große flache Weltkarte · reines Canvas, läuft offline · für Hasan</footer>
+
+<script>
+const cv=document.getElementById("map"), ctx=cv.getContext("2d");
+const stage=cv.parentElement;
+let W,H,DPR;
+function resize(){
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  W=stage.clientWidth; H=Math.round(W/2);
+  cv.width=W*DPR; cv.height=H*DPR;
+  cv.style.height=H+"px";
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener("resize",resize); resize();
+
+// Umrechnung Längen-/Breitengrad -> Bildschirm (äquirektangular)
+function px(lon){return (lon+180)/360*W;}
+function py(lat){return (90-lat)/180*H;}
+
+// ---- Kontinente (schematisch, Basis 1000x500) ----
+const POLYS=[
+ [[33,69],[69,53],[144,56],[236,50],[272,47],[283,61],[322,83],[344,106],[317,125],[306,133],[275,181],[256,167],[231,178],[208,189],[194,167],[175,158],[156,139],[153,117],[125,89],[83,86],[42,83]],
+ [[375,83],[417,56],[444,39],[417,22],[361,28],[339,39],[361,61]],
+ [[278,228],[283,250],[278,264],[292,292],[306,306],[303,333],[297,361],[317,403],[319,389],[339,361],[367,319],[389,311],[403,272],[378,256],[361,250],[356,236],[333,222],[283,219]],
+ [[453,192],[453,208],[472,236],[522,239],[528,256],[536,278],[533,300],[542,328],[556,347],[578,342],[592,319],[611,292],[617,256],[642,217],[622,217],[619,208],[603,189],[592,164],[569,161],[531,156],[508,147],[483,150],[472,167],[458,183]],
+ [[472,144],[475,131],[486,117],[494,114],[506,108],[522,100],[533,97],[556,97],[583,83],[578,61],[542,61],[514,78],[528,89],[508,100],[494,111],[486,128],[475,139]],
+ [[578,61],[583,83],[611,125],[597,147],[625,139],[639,167],[633,181],[656,181],[667,189],[686,183],[700,192],[711,228],[722,228],[722,208],[744,192],[756,192],[772,228],[789,247],[792,222],[803,208],[800,192],[819,186],[839,167],[839,139],[853,144],[861,131],[875,97],[897,86],[944,81],[972,67],[1000,61],[1000,50],[889,47],[778,33],[667,56],[611,61],[583,69]],
+ [[817,311],[839,300],[861,283],[881,283],[894,281],[906,300],[917,319],[925,339],[917,356],[897,358],[875,347],[858,339],[842,344],[819,344],[817,328]]
+];
+function inPoly(x,y,p){let c=false;for(let i=0,j=p.length-1;i<p.length;j=i++){const xi=p[i][0],yi=p[i][1],xj=p[j][0],yj=p[j][1];if(((yi>y)!=(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c;}return c;}
+// Land-Lichtpunkte (in Basis-Koordinaten gespeichert, beim Zeichnen skaliert)
+const DOTS=[];
+for(let by=8; by<500; by+=5){
+  for(let bx=0; bx<1000; bx+=5){
+    for(const p of POLYS){ if(inPoly(bx,by,p)){ DOTS.push([bx,by]); break; } }
+  }
+}
+
+// ---- Knotenpunkte (echte Städte) ----
+const HUBS={
+  newyork:[40.7,-74,"New York","end",-8,-8], losangeles:[34,-118.2,"Los Angeles","end",-8,16], miami:[25.8,-80.2,"Miami","end",-8,15],
+  fortaleza:[-3.7,-38.5,"Fortaleza","start",6,16], saopaulo:[-23.5,-46.6,"São Paulo","end",-8,16],
+  london:[51.5,-0.1,"London","end",-8,-8], lisbon:[38.7,-9.1,"Lissabon","end",-8,15], frankfurt:[50.1,8.7,"Frankfurt","start",8,-7],
+  marseille:[43.3,5.4,"Marseille","start",8,15], lagos:[6.5,3.4,"Lagos","end",-8,15], capetown:[-33.9,18.4,"Kapstadt","start",8,15],
+  mombasa:[-4,39.6,"Mombasa","start",8,4], dubai:[25.2,55.3,"Dubai","start",8,-5], mumbai:[19,72.8,"Mumbai","start",8,15],
+  singapore:[1.35,103.8,"Singapur","start",8,15], hongkong:[22.3,114.2,"Hongkong","start",8,-5], tokyo:[35.7,139.7,"Tokio","start",10,-5],
+  sydney:[-33.9,151.2,"Sydney","start",8,15]
+};
+const LINKS=[
+ ["newyork","london"],["newyork","lisbon"],["miami","fortaleza"],["fortaleza","saopaulo"],
+ ["fortaleza","lisbon"],["lisbon","london"],["london","frankfurt"],["frankfurt","marseille"],
+ ["marseille","dubai"],["dubai","mumbai"],["marseille","mombasa"],["mombasa","capetown"],
+ ["lisbon","lagos"],["lagos","capetown"],["capetown","mumbai"],["mumbai","singapore"],
+ ["singapore","hongkong"],["hongkong","tokyo"],["tokyo","losangeles"],["singapore","sydney"],
+ ["sydney","losangeles"],["losangeles","miami"],["miami","newyork"]
+];
+
+// gebogenen Pfad zwischen zwei Punkten als Punktliste (quadratische Kurve)
+function arcPoints(ax,ay,bx,by){
+  const mx=(ax+bx)/2,my=(ay+by)/2,dx=bx-ax,dy=by-ay,len=Math.hypot(dx,dy)||1;
+  const off=Math.min(len*0.18, H*0.18);
+  const cxp=mx+(-dy/len)*off, cyp=my+(dx/len)*off;
+  const N=60,pts=[];
+  for(let i=0;i<=N;i++){const t=i/N,u=1-t;
+    pts.push([u*u*ax+2*u*t*cxp+t*t*bx, u*u*ay+2*u*t*cyp+t*t*by]);}
+  return pts;
+}
+
+let t0=null;
+function frame(ts){
+  if(t0===null)t0=ts; const time=(ts-t0)/1000;
+  const sx=W/1000, sy=H/500;
+  ctx.clearRect(0,0,W,H);
+
+  // Ozean-Hintergrund mit weichem Verlauf
+  const bg=ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,"#071326"); bg.addColorStop(0.5,"#0a1830"); bg.addColorStop(1,"#050d1c");
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // feines Gitter
+  ctx.strokeStyle="rgba(255,255,255,0.04)"; ctx.lineWidth=1;
+  for(let i=1;i<4;i++){ctx.beginPath();ctx.moveTo(0,H*i/4);ctx.lineTo(W,H*i/4);ctx.stroke();}
+  for(let i=1;i<6;i++){ctx.beginPath();ctx.moveTo(W*i/6,0);ctx.lineTo(W*i/6,H);ctx.stroke();}
+
+  // Land-Lichtpunkte
+  const sdot=Math.max(1.3, W/600);
+  for(const d of DOTS){
+    ctx.fillStyle="rgba(70,140,235,0.85)";
+    ctx.fillRect(d[0]*sx, d[1]*sy, sdot, sdot);
+  }
+
+  // Bögen + wandernde Pulse
+  ctx.lineWidth=Math.max(1.4, W/900); ctx.lineJoin="round";
+  for(let i=0;i<LINKS.length;i++){
+    const A=HUBS[LINKS[i][0]],B=HUBS[LINKS[i][1]];
+    const ax=px(A[1]),ay=py(A[0]),bx=px(B[1]),by=py(B[0]);
+    const pts=arcPoints(ax,ay,bx,by);
+    ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]);
+    for(const p of pts)ctx.lineTo(p[0],p[1]);
+    ctx.strokeStyle="rgba(70,224,192,0.5)";
+    ctx.shadowColor="rgba(70,224,192,0.9)"; ctx.shadowBlur=8; ctx.stroke(); ctx.shadowBlur=0;
+    // Puls
+    const N=pts.length, head=((time*0.30 + i*0.11)%1);
+    for(let k=0;k<7;k++){
+      const tt=head-k*0.03; if(tt<0)continue;
+      const p=pts[Math.floor(tt*(N-1))];
+      ctx.globalAlpha=1-k/7;
+      ctx.fillStyle=k===0?"#eafffb":"#7ff0d8";
+      ctx.beginPath(); ctx.arc(p[0],p[1],k===0?3.6:2.2,0,7); ctx.fill();
+    }
+    ctx.globalAlpha=1;
+  }
+
+  // Knotenpunkte + Namen
+  ctx.font=`600 ${Math.max(11,W/95)}px system-ui,sans-serif`; ctx.textBaseline="middle";
+  const pulse=0.5+0.5*Math.sin(time*2);
+  for(const k in HUBS){
+    const h=HUBS[k], x=px(h[1]), y=py(h[0]);
+    ctx.globalAlpha=0.25+0.25*pulse; ctx.fillStyle="#ffcf66";
+    ctx.beginPath(); ctx.arc(x,y,8+4*pulse,0,7); ctx.fill();
+    ctx.globalAlpha=1; ctx.fillStyle="#ffd87a";
+    ctx.shadowColor="#ffcf66"; ctx.shadowBlur=10;
+    ctx.beginPath(); ctx.arc(x,y,3.2,0,7); ctx.fill(); ctx.shadowBlur=0;
+    ctx.textAlign=h[3];
+    ctx.lineWidth=3.5; ctx.strokeStyle="#050d1c"; ctx.strokeText(h[2], x+h[4], y+h[5]);
+    ctx.fillStyle="#eaf3ff"; ctx.fillText(h[2], x+h[4], y+h[5]);
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

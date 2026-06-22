@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Erdkugel — Das Internet als leuchtendes Netz</title>
+<style>
+  :root{ --text:#eaf0ff; --muted:#94a3c8; --gold:#ffcf66; --cy:#46e0c0; --bl:#5aa8ff; }
+  *{box-sizing:border-box}
+  html,body{margin:0; background:#03060f; color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif; overflow-x:hidden}
+  header{text-align:center; padding:30px 20px 4px}
+  header h1{margin:0 0 6px; font-size:clamp(22px,3.4vw,34px);
+    background:linear-gradient(90deg,#7fe9ff,#9affd1); -webkit-background-clip:text;
+    background-clip:text; color:transparent}
+  header p{margin:0 auto; color:var(--muted); max-width:640px; font-size:15px}
+
+  .stage{position:relative; width:100%; max-width:760px; margin:6px auto 0; aspect-ratio:1/1}
+  canvas{position:absolute; inset:0; width:100%; height:100%; display:block}
+
+  .legend{display:flex; flex-wrap:wrap; gap:20px; justify-content:center;
+    color:var(--muted); font-size:14px; margin:6px auto 0; padding:0 18px}
+  .legend span{display:inline-flex; align-items:center; gap:8px}
+  .d{width:12px;height:12px;border-radius:50%}
+  .d.g{background:var(--gold); box-shadow:0 0 8px var(--gold)}
+  .d.c{background:var(--cy); box-shadow:0 0 8px var(--cy)}
+  .d.l{width:18px;height:10px;border-radius:3px;background:#2b6bd6;opacity:.7}
+
+  .info{max-width:920px; margin:24px auto 60px; padding:0 18px}
+  .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px}
+  .card{background:#0a1224; border:1px solid #1d2b4d; border-radius:14px; padding:16px}
+  .card .e{font-size:26px} .card h3{margin:8px 0 4px; font-size:16px}
+  .card p{margin:0; color:var(--muted); font-size:14px}
+  .vok{display:inline-block; font-size:12.5px; color:var(--cy);
+    background:#0a1224; border:1px solid #1d2b4d; border-radius:999px; padding:2px 9px; margin:3px 4px 0 0}
+  .vok i{color:var(--muted)}
+  footer{text-align:center; color:var(--muted); font-size:13px; padding:10px 20px 30px}
+</style>
+</head>
+<body>
+<nav id="atlasnav" style="position:sticky;top:0;z-index:99999;display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;background:#070d18;border-bottom:1px solid #1b2742;font-family:system-ui,-apple-system,sans-serif;font-size:13px"><a href="index.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">📊 Übersicht</a><a href="aufbau.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">📖 Aufbau</a><a href="weltkarte.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">🗺️ Weltkarte</a><a href="globus.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">🌍 Globus</a><a href="flachkarte.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">🛰️ Flache Karte</a></nav>
+
+
+<header>
+  <h1>🌍 Die Erde als ein leuchtendes Netz</h1>
+  <p>Die Kugel dreht sich. Jeder leuchtende Bogen ist eine große Internet-Verbindung zwischen zwei Knotenpunkten der Welt — die Lichter wandern, weil dort Daten fließen.</p>
+</header>
+
+<div class="stage"><canvas id="globe"></canvas></div>
+
+<div class="legend">
+  <span><i class="d g"></i> Knotenpunkt (Stadt mit Rechenzentren)</span>
+  <span><i class="d c"></i> wandernde Daten</span>
+  <span><i class="d l"></i> Landmasse (aus Lichtpunkten)</span>
+</div>
+
+<div class="info">
+  <div class="cards">
+    <div class="card"><div class="e">🌊</div><h3>~95 % über Kabel</h3><p>Fast alles läuft durch Glasfaser am Meeresboden — die Bögen zeigen nur die Haupt-Routen.</p></div>
+    <div class="card"><div class="e">⚡</div><h3>Mit Lichtgeschwindigkeit</h3><p>In den Fasern reist Licht. Von Frankfurt nach Tokio dauert das nur Sekundenbruchteile.</p></div>
+    <div class="card"><div class="e">🔗</div><h3>Alles hängt zusammen</h3><p>Kein Land ist allein — jeder Punkt ist über mehrere Wege mit dem Rest verbunden.</p></div>
+  </div>
+  <p style="margin-top:16px">
+    <span class="vok"><b>Globe</b> <i>gloub</i> = Erdkugel</span>
+    <span class="vok"><b>Node</b> <i>noud</i> = Knoten(punkt)</span>
+    <span class="vok"><b>Latency</b> <i>lei-tn-si</i> = Verzögerung / Laufzeit</span>
+    <span class="vok"><b>Great Circle</b> <i>greit ssör-kl</i> = kürzester Weg über die Kugel</span>
+  </p>
+</div>
+
+<footer>Echtzeit-3D in deinem Browser · reines Canvas, läuft offline · für Hasan</footer>
+
+<script>
+const cv=document.getElementById("globe"), ctx=cv.getContext("2d");
+const stage=cv.parentElement;
+let W,H,R,cx,cy,DPR;
+function resize(){
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  const s=stage.clientWidth;
+  cv.width=s*DPR; cv.height=s*DPR;
+  W=s; H=s; ctx.setTransform(DPR,0,0,DPR,0,0);
+  R=s*0.40; cx=s/2; cy=s/2;
+}
+window.addEventListener("resize",resize); resize();
+
+// ---- Kontinente (schematisch, äquirektangular 1000x500) ----
+const POLYS=[
+ [[33,69],[69,53],[144,56],[236,50],[272,47],[283,61],[322,83],[344,106],[317,125],[306,133],[275,181],[256,167],[231,178],[208,189],[194,167],[175,158],[156,139],[153,117],[125,89],[83,86],[42,83]],
+ [[375,83],[417,56],[444,39],[417,22],[361,28],[339,39],[361,61]],
+ [[278,228],[283,250],[278,264],[292,292],[306,306],[303,333],[297,361],[317,403],[319,389],[339,361],[367,319],[389,311],[403,272],[378,256],[361,250],[356,236],[333,222],[283,219]],
+ [[453,192],[453,208],[472,236],[522,239],[528,256],[536,278],[533,300],[542,328],[556,347],[578,342],[592,319],[611,292],[617,256],[642,217],[622,217],[619,208],[603,189],[592,164],[569,161],[531,156],[508,147],[483,150],[472,167],[458,183]],
+ [[472,144],[475,131],[486,117],[494,114],[506,108],[522,100],[533,97],[556,97],[583,83],[578,61],[542,61],[514,78],[528,89],[508,100],[494,111],[486,128],[475,139]],
+ [[578,61],[583,83],[611,125],[597,147],[625,139],[639,167],[633,181],[656,181],[667,189],[686,183],[700,192],[711,228],[722,228],[722,208],[744,192],[756,192],[772,228],[789,247],[792,222],[803,208],[800,192],[819,186],[839,167],[839,139],[853,144],[861,131],[875,97],[897,86],[944,81],[972,67],[1000,61],[1000,50],[889,47],[778,33],[667,56],[611,61],[583,69]],
+ [[817,311],[839,300],[861,283],[881,283],[894,281],[906,300],[917,319],[925,339],[917,356],[897,358],[875,347],[858,339],[842,344],[819,344],[817,328]]
+];
+function inPoly(x,y,p){let c=false;for(let i=0,j=p.length-1;i<p.length;j=i++){const xi=p[i][0],yi=p[i][1],xj=p[j][0],yj=p[j][1];if(((yi>y)!=(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c;}return c;}
+function isLand(lat,lon){const x=(lon+180)/360*1000, y=(90-lat)/180*500;for(const p of POLYS)if(inPoly(x,y,p))return true;return false;}
+
+// Lichtpunkte der Landmassen erzeugen
+const DOTS=[];
+for(let lat=-82; lat<=84; lat+=2.4){
+  for(let lon=-180; lon<180; lon+=2.4){
+    if(isLand(lat,lon)){
+      const φ=lat*Math.PI/180, λ=lon*Math.PI/180;
+      DOTS.push([Math.cos(φ)*Math.sin(λ), Math.sin(φ), Math.cos(φ)*Math.cos(λ)]);
+    }
+  }
+}
+
+// ---- Knotenpunkte (echte Städte) ----
+const HUBS={
+  newyork:[40.7,-74,"New York"], losangeles:[34,-118.2,"Los Angeles"], miami:[25.8,-80.2,"Miami"],
+  fortaleza:[-3.7,-38.5,"Fortaleza"], saopaulo:[-23.5,-46.6,"São Paulo"],
+  london:[51.5,-0.1,"London"], lisbon:[38.7,-9.1,"Lissabon"], frankfurt:[50.1,8.7,"Frankfurt"],
+  marseille:[43.3,5.4,"Marseille"], lagos:[6.5,3.4,"Lagos"], capetown:[-33.9,18.4,"Kapstadt"],
+  mombasa:[-4,39.6,"Mombasa"], dubai:[25.2,55.3,"Dubai"], mumbai:[19,72.8,"Mumbai"],
+  singapore:[1.35,103.8,"Singapur"], hongkong:[22.3,114.2,"Hongkong"], tokyo:[35.7,139.7,"Tokio"],
+  sydney:[-33.9,151.2,"Sydney"]
+};
+function ll2v(lat,lon){const φ=lat*Math.PI/180,λ=lon*Math.PI/180;return [Math.cos(φ)*Math.sin(λ),Math.sin(φ),Math.cos(φ)*Math.cos(λ)];}
+for(const k in HUBS){const h=HUBS[k]; h.v=ll2v(h[0],h[1]);}
+
+const LINKS=[
+ ["newyork","london"],["newyork","lisbon"],["miami","fortaleza"],["fortaleza","saopaulo"],
+ ["fortaleza","lisbon"],["lisbon","london"],["london","frankfurt"],["frankfurt","marseille"],
+ ["marseille","dubai"],["dubai","mumbai"],["marseille","mombasa"],["mombasa","capetown"],
+ ["lisbon","lagos"],["lagos","capetown"],["capetown","mumbai"],["mumbai","singapore"],
+ ["singapore","hongkong"],["hongkong","tokyo"],["tokyo","losangeles"],["singapore","sydney"],
+ ["sydney","losangeles"],["losangeles","miami"],["miami","newyork"]
+];
+// Bögen als Great-Circle-Punkte mit Höhe vorberechnen
+function slerp(a,b,t){
+  let d=a[0]*b[0]+a[1]*b[1]+a[2]*b[2]; d=Math.max(-1,Math.min(1,d));
+  const Ω=Math.acos(d), s=Math.sin(Ω);
+  if(s<1e-6)return a.slice();
+  const k0=Math.sin((1-t)*Ω)/s, k1=Math.sin(t*Ω)/s;
+  return [a[0]*k0+b[0]*k1, a[1]*k0+b[1]*k1, a[2]*k0+b[2]*k1];
+}
+const ARCS=LINKS.map(([a,b])=>{
+  const A=HUBS[a].v,B=HUBS[b].v,N=50,pts=[];
+  for(let i=0;i<=N;i++){const t=i/N;const v=slerp(A,B,t);const alt=1+0.20*Math.sin(Math.PI*t);pts.push([v[0],v[1],v[2],alt]);}
+  return pts;
+});
+
+// Sterne
+const STARS=[];
+for(let i=0;i<160;i++)STARS.push([Math.random()*1000, Math.random()*1000, Math.random()*0.7+0.2]);
+
+// ---- Rotation / Projektion ----
+let rot=0; const tilt=0.34, ct=Math.cos(tilt), st=Math.sin(tilt);
+function project(v,altR){
+  // Spin um Y
+  const cr=Math.cos(rot), sr=Math.sin(rot);
+  let x=v[0]*cr+v[2]*sr, z=-v[0]*sr+v[2]*cr, y=v[1];
+  // Kippung um X
+  const y2=y*ct - z*st, z2=y*st + z*ct;
+  const r=R*(altR||1);
+  return [cx + r*x, cy - r*y2, z2];
+}
+
+let t0=null;
+function frame(ts){
+  if(t0===null)t0=ts; const time=(ts-t0)/1000;
+  rot = time*0.18;
+  ctx.clearRect(0,0,W,H);
+
+  // Sterne
+  for(const s of STARS){ctx.globalAlpha=s[2];ctx.fillStyle="#cdd8ff";ctx.fillRect(s[0]/1000*W,s[1]/1000*H,1.4,1.4);}
+  ctx.globalAlpha=1;
+
+  // Atmosphäre
+  let ga=ctx.createRadialGradient(cx,cy,R*0.9,cx,cy,R*1.18);
+  ga.addColorStop(0,"rgba(70,150,255,0.25)"); ga.addColorStop(1,"rgba(70,150,255,0)");
+  ctx.fillStyle=ga; ctx.beginPath(); ctx.arc(cx,cy,R*1.18,0,7); ctx.fill();
+
+  // Ozean-Kugel mit Licht von oben-links
+  let og=ctx.createRadialGradient(cx-R*0.35,cy-R*0.35,R*0.1,cx,cy,R);
+  og.addColorStop(0,"#13315f"); og.addColorStop(0.6,"#0a1c3c"); og.addColorStop(1,"#040b1c");
+  ctx.fillStyle=og; ctx.beginPath(); ctx.arc(cx,cy,R,0,7); ctx.fill();
+
+  // Land-Lichtpunkte (nur Vorderseite)
+  for(const d of DOTS){
+    const p=project(d);
+    if(p[2]<=0.02)continue;
+    const b=p[2];
+    ctx.globalAlpha=0.22+0.7*b;
+    ctx.fillStyle = b>0.55 ? "#5fb8ff" : "#2f74d6";
+    const s=0.9+1.3*b;
+    ctx.fillRect(p[0]-s/2,p[1]-s/2,s,s);
+  }
+  ctx.globalAlpha=1;
+
+  // Bögen
+  ctx.lineWidth=1.6; ctx.lineJoin="round";
+  for(let ai=0; ai<ARCS.length; ai++){
+    const arc=ARCS[ai];
+    ctx.beginPath(); let started=false;
+    for(const q of arc){
+      const p=project([q[0],q[1],q[2]], q[3]);
+      if(p[2]<=0){ started=false; continue; }
+      if(!started){ ctx.moveTo(p[0],p[1]); started=true; } else ctx.lineTo(p[0],p[1]);
+    }
+    ctx.strokeStyle="rgba(70,224,192,0.55)";
+    ctx.shadowColor="rgba(70,224,192,0.9)"; ctx.shadowBlur=6;
+    ctx.stroke();
+    ctx.shadowBlur=0;
+
+    // wandernder Licht-Puls
+    const N=arc.length;
+    const head=((time*0.35 + ai*0.13)%1);
+    for(let k=0;k<6;k++){
+      const tt=head - k*0.035; if(tt<0)continue;
+      const idx=Math.floor(tt*(N-1)); const q=arc[idx];
+      const p=project([q[0],q[1],q[2]], q[3]);
+      if(p[2]<=0)continue;
+      ctx.globalAlpha=(1-k/6);
+      ctx.fillStyle = k===0 ? "#eafffb" : "#7ff0d8";
+      const s=k===0?3.2:2.0;
+      ctx.beginPath(); ctx.arc(p[0],p[1],s,0,7); ctx.fill();
+    }
+    ctx.globalAlpha=1;
+  }
+
+  // Knotenpunkte + Namen
+  ctx.font="600 12px system-ui,sans-serif"; ctx.textBaseline="middle";
+  for(const k in HUBS){
+    const h=HUBS[k]; const p=project(h.v);
+    if(p[2]<=0.05)continue;
+    // Glühen
+    ctx.globalAlpha=0.35*p[2];
+    ctx.fillStyle="#ffcf66"; ctx.beginPath(); ctx.arc(p[0],p[1],7,0,7); ctx.fill();
+    // Punkt
+    ctx.globalAlpha=1; ctx.fillStyle="#ffd87a";
+    ctx.shadowColor="#ffcf66"; ctx.shadowBlur=8;
+    ctx.beginPath(); ctx.arc(p[0],p[1],2.6,0,7); ctx.fill(); ctx.shadowBlur=0;
+    // Name (nur wenn gut sichtbar)
+    if(p[2]>0.25){
+      ctx.globalAlpha=Math.min(1,(p[2]-0.25)*2.5);
+      ctx.fillStyle="#0a0f1e"; ctx.lineWidth=3; ctx.strokeStyle="#0a0f1e";
+      ctx.strokeText(h[2], p[0]+7, p[1]-7);
+      ctx.fillStyle="#eaf3ff"; ctx.fillText(h[2], p[0]+7, p[1]-7);
+    }
+  }
+  ctx.globalAlpha=1;
+
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

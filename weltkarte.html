@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weltkarte — Das große Internet-Kabelnetz</title>
+<style>
+  :root{
+    --bg:#060b1a; --ocean:#0a1530; --land:#27406b; --land-edge:#3a5a93;
+    --text:#eaf0ff; --muted:#93a3cc; --cable:#34d399; --cable2:#4ea8ff;
+    --hub:#fbbf24; --panel:#101a36; --border:#27406b;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0; background:var(--bg); color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+  header{padding:26px 20px 6px; text-align:center}
+  header h1{margin:0 0 6px; font-size:clamp(22px,3.4vw,34px)}
+  header p{margin:0 auto; color:var(--muted); max-width:680px; font-size:15px}
+
+  .mapwrap{max-width:1180px; margin:18px auto; padding:0 14px}
+  .mapbox{
+    background:radial-gradient(900px 420px at 60% 20%, #0d1a3a 0%, var(--ocean) 70%);
+    border:1px solid var(--border); border-radius:18px; overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+  }
+  svg{display:block; width:100%; height:auto}
+
+  .land{fill:var(--land); stroke:var(--land-edge); stroke-width:1; stroke-linejoin:round}
+  .grid{stroke:#ffffff10; stroke-width:.6}
+
+  .cable{
+    fill:none; stroke:var(--cable); stroke-width:1.8; opacity:.85;
+    stroke-linecap:round;
+    stroke-dasharray:6 10; animation:flow 2.4s linear infinite;
+    filter:drop-shadow(0 0 4px var(--cable));
+  }
+  .cable.b{stroke:var(--cable2); filter:drop-shadow(0 0 4px var(--cable2));
+    animation-duration:3.2s}
+  @keyframes flow{to{stroke-dashoffset:-160}}
+
+  .hub{fill:var(--hub); stroke:#1a1205; stroke-width:1}
+  .hub-glow{fill:var(--hub); opacity:.25; animation:pulse 2.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{r:6; opacity:.12} 50%{r:14; opacity:.4}}
+  .hub-label{fill:#dbe6ff; font-size:11px; font-weight:600;
+    paint-order:stroke; stroke:#060b1a; stroke-width:3px; stroke-linejoin:round}
+
+  .legend{
+    max-width:1180px; margin:14px auto 8px; padding:0 18px;
+    display:flex; flex-wrap:wrap; gap:18px; justify-content:center;
+    color:var(--muted); font-size:14px;
+  }
+  .legend span{display:inline-flex; align-items:center; gap:8px}
+  .swatch{width:26px; height:0; border-top:3px solid var(--cable); border-radius:2px}
+  .swatch.b{border-color:var(--cable2)}
+  .swatch.dot{width:12px;height:12px;border:0;border-radius:50%;background:var(--hub)}
+  .swatch.land{width:18px;height:12px;border:0;border-radius:3px;background:var(--land);border:1px solid var(--land-edge)}
+
+  .info{max-width:1000px; margin:26px auto 60px; padding:0 18px}
+  .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px}
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:16px}
+  .card .e{font-size:26px}
+  .card h3{margin:8px 0 4px; font-size:16px}
+  .card p{margin:0; color:var(--muted); font-size:14px}
+  .vok{display:inline-block; font-size:12.5px; color:var(--cable);
+    background:#0c1730; border:1px solid var(--border); border-radius:999px;
+    padding:2px 9px; margin:3px 4px 0 0}
+  .vok i{color:var(--muted)}
+  .big{background:var(--panel); border:1px solid var(--border); border-radius:14px;
+    padding:18px 20px; margin-top:18px}
+  .big b{color:var(--text)}
+  footer{text-align:center; color:var(--muted); font-size:13px; padding:20px}
+</style>
+</head>
+<body>
+<nav id="atlasnav" style="position:sticky;top:0;z-index:99999;display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;background:#070d18;border-bottom:1px solid #1b2742;font-family:system-ui,-apple-system,sans-serif;font-size:13px"><a href="index.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">📊 Übersicht</a><a href="aufbau.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">📖 Aufbau</a><a href="weltkarte.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">🗺️ Weltkarte</a><a href="globus.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">🌍 Globus</a><a href="flachkarte.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">🛰️ Flache Karte</a></nav>
+
+
+<header>
+  <h1>🌐 Das große Internet-Kabelnetz der Welt</h1>
+  <p>Die leuchtenden Linien sind die <b>Haupt-Leitungen (Backbone)</b> — vor allem Glasfaser-Kabel am <b>Meeresboden</b>, die die Kontinente verbinden. Gelbe Punkte = große Knotenpunkte mit Rechenzentren. Die Linien fließen, weil dort echte Daten laufen.</p>
+</header>
+
+<div class="mapwrap">
+  <div class="mapbox">
+    <svg viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Weltkarte mit Internet-Seekabeln">
+      <!-- Gitterlinien -->
+      <g class="grid">
+        <line x1="0" y1="125" x2="1000" y2="125"/>
+        <line x1="0" y1="250" x2="1000" y2="250"/>
+        <line x1="0" y1="375" x2="1000" y2="375"/>
+        <line x1="250" y1="0" x2="250" y2="500"/>
+        <line x1="500" y1="0" x2="500" y2="500"/>
+        <line x1="750" y1="0" x2="750" y2="500"/>
+      </g>
+
+      <!-- Kontinente (schematisch, äquirektangular) -->
+      <g id="continents">
+        <!-- Nordamerika -->
+        <path class="land" d="M33,69 69,53 144,56 236,50 272,47 283,61 322,83 344,106 317,125 306,133 275,181 256,167 231,178 208,189 194,167 175,158 156,139 153,117 125,89 83,86 42,83 Z"/>
+        <!-- Grönland -->
+        <path class="land" d="M375,83 417,56 444,39 417,22 361,28 339,39 361,61 Z"/>
+        <!-- Südamerika -->
+        <path class="land" d="M278,228 283,250 278,264 292,292 306,306 303,333 297,361 317,403 319,389 339,361 367,319 389,311 403,272 378,256 361,250 356,236 333,222 283,219 Z"/>
+        <!-- Afrika -->
+        <path class="land" d="M453,192 453,208 472,236 522,239 528,256 536,278 533,300 542,328 556,347 578,342 592,319 611,292 617,256 642,217 622,217 619,208 603,189 592,164 569,161 531,156 508,147 483,150 472,167 458,183 Z"/>
+        <!-- Europa -->
+        <path class="land" d="M472,144 475,131 486,117 494,114 506,108 522,100 533,97 556,97 583,83 578,61 542,61 514,78 528,89 508,100 494,111 486,128 475,139 Z"/>
+        <!-- Asien -->
+        <path class="land" d="M578,61 583,83 611,125 597,147 625,139 639,167 633,181 656,181 667,189 686,183 700,192 711,228 722,228 722,208 744,192 756,192 772,228 789,247 792,222 803,208 800,192 819,186 839,167 839,139 853,144 861,131 875,97 897,86 944,81 972,67 1000,61 1000,50 889,47 778,33 667,56 611,61 583,69 Z"/>
+        <!-- Australien -->
+        <path class="land" d="M817,311 839,300 861,283 881,283 894,281 906,300 917,319 925,339 917,356 897,358 875,347 858,339 842,344 819,344 817,328 Z"/>
+        <!-- Inseln -->
+        <ellipse class="land" cx="495" cy="110" rx="9" ry="6"/>      <!-- Großbritannien -->
+        <ellipse class="land" cx="889" cy="150" rx="8" ry="13"/>     <!-- Japan -->
+        <ellipse class="land" cx="612" cy="312" rx="6" ry="12"/>     <!-- Madagaskar -->
+        <ellipse class="land" cx="968" cy="362" rx="7" ry="11"/>     <!-- Neuseeland -->
+        <ellipse class="land" cx="800" cy="258" rx="22" ry="7"/>     <!-- Indonesien -->
+        <ellipse class="land" cx="830" cy="230" rx="6" ry="9"/>      <!-- Philippinen -->
+      </g>
+
+      <!-- Kabel + Knotenpunkte werden per JS gezeichnet -->
+      <g id="cables"></g>
+      <g id="hubs"></g>
+    </svg>
+  </div>
+</div>
+
+<div class="legend">
+  <span><i class="swatch"></i> Seekabel (Tiefsee-Glasfaser)</span>
+  <span><i class="swatch b"></i> große Trans-Ozean-Route</span>
+  <span><i class="swatch dot"></i> Knotenpunkt / Rechenzentren</span>
+  <span><i class="swatch land"></i> Landmasse</span>
+</div>
+
+<div class="info">
+  <div class="cards">
+    <div class="card"><div class="e">🌊</div><h3>~95 % laufen durch Kabel</h3><p>Fast der ganze Welt-Verkehr fließt durch Kabel am Meeresboden — <b>nicht</b> über Satelliten.</p></div>
+    <div class="card"><div class="e">🔢</div><h3>Über 550 Kabel</h3><p>So viele Seekabel liegen aktuell auf der Erde, zusammen über 1,4 Mio. km lang.</p></div>
+    <div class="card"><div class="e">🇩🇪</div><h3>Frankfurt = Welt-Kreuzung</h3><p>Der DE-CIX in Frankfurt ist einer der größten Knotenpunkte der Welt.</p></div>
+    <div class="card"><div class="e">🇧🇷</div><h3>Fortaleza</h3><p>Brasiliens Küstenstadt — Tor für fast alle Kabel zwischen Südamerika, USA, Europa &amp; Afrika.</p></div>
+  </div>
+
+  <div class="big">
+    <p style="margin-top:0"><b>Wie man die Karte liest:</b> Jede leuchtende Linie ist ein <b>Bündel echter Glasfasern</b> — dünn wie ein Gartenschlauch, aber jede trägt Daten von Millionen Menschen. Sie landen an der Küste in kleinen Häuschen (<i>Landing Stations</i>) und gehen von dort an Land weiter zu den Rechenzentren.</p>
+    <div style="margin-top:8px">
+      <span class="vok"><b>Backbone</b> <i>bäck-boun</i> = Rückgrat / Haupt-Leitung</span>
+      <span class="vok"><b>Submarine Cable</b> <i>ssab-ma-rien kei-bl</i> = Seekabel</span>
+      <span class="vok"><b>Landing Station</b> <i>länding stei-schn</i> = Anlandungs-Punkt</span>
+      <span class="vok"><b>Hub</b> <i>habb</i> = Knotenpunkt</span>
+      <span class="vok"><b>Bandwidth</b> <i>bänd-witth</i> = Daten-Breite / Kapazität</span>
+    </div>
+  </div>
+</div>
+
+<footer>Schematische Weltkarte (äquirektangular) · bildlich für Hasan · Datei auf dem Desktop</footer>
+
+<script>
+// Knotenpunkte: echte Städte, Position aus Längen-/Breitengrad umgerechnet
+// x = (lon+180)/360*1000 ,  y = (90-lat)/180*500
+const HUBS = {
+  newyork:   {x:294, y:137, name:"New York",   dx:-8,  dy:-8,  anchor:"end"},
+  losangeles:{x:172, y:156, name:"Los Angeles",dx:-8,  dy:14,  anchor:"end"},
+  miami:     {x:277, y:178, name:"Miami",      dx:-8,  dy:14,  anchor:"end"},
+  fortaleza: {x:393, y:260, name:"Fortaleza",  dx:6,   dy:14,  anchor:"start"},
+  saopaulo:  {x:371, y:315, name:"São Paulo",  dx:-8,  dy:14,  anchor:"end"},
+  london:    {x:500, y:107, name:"London",     dx:-8,  dy:-8,  anchor:"end"},
+  lisbon:    {x:475, y:143, name:"Lissabon",   dx:-8,  dy:14,  anchor:"end"},
+  frankfurt: {x:524, y:111, name:"Frankfurt",  dx:8,   dy:-6,  anchor:"start"},
+  marseille: {x:515, y:130, name:"Marseille",  dx:8,   dy:14,  anchor:"start"},
+  lagos:     {x:509, y:232, name:"Lagos",      dx:-8,  dy:14,  anchor:"end"},
+  capetown:  {x:551, y:344, name:"Kapstadt",   dx:8,   dy:14,  anchor:"start"},
+  mombasa:   {x:610, y:261, name:"Mombasa",    dx:8,   dy:4,   anchor:"start"},
+  dubai:     {x:654, y:180, name:"Dubai",      dx:8,   dy:-4,  anchor:"start"},
+  mumbai:    {x:702, y:197, name:"Mumbai",     dx:8,   dy:14,  anchor:"start"},
+  singapore: {x:788, y:246, name:"Singapur",   dx:8,   dy:14,  anchor:"start"},
+  hongkong:  {x:817, y:188, name:"Hongkong",   dx:8,   dy:-4,  anchor:"start"},
+  tokyo:     {x:888, y:151, name:"Tokio",      dx:10,  dy:-4,  anchor:"start"},
+  sydney:    {x:920, y:344, name:"Sydney",     dx:8,   dy:14,  anchor:"start"},
+};
+
+// Kabel-Routen [von, nach, große Route?]
+const CABLES = [
+  ["newyork","london", true],
+  ["newyork","lisbon", true],
+  ["miami","fortaleza", false],
+  ["fortaleza","saopaulo", false],
+  ["fortaleza","lisbon", true],      // EllaLink
+  ["lisbon","london", false],
+  ["london","frankfurt", false],
+  ["frankfurt","marseille", false],
+  ["marseille","dubai", true],       // SEA-ME-WE via Suez
+  ["dubai","mumbai", false],
+  ["marseille","mombasa", true],     // Ostafrika
+  ["mombasa","capetown", false],
+  ["lisbon","lagos", true],          // Westafrika 2Africa/WACS
+  ["lagos","capetown", false],
+  ["capetown","mumbai", false],
+  ["mumbai","singapore", true],
+  ["singapore","hongkong", false],
+  ["hongkong","tokyo", false],
+  ["tokyo","losangeles", true],      // Trans-Pazifik
+  ["singapore","sydney", true],
+  ["sydney","losangeles", true],     // Southern Cross
+  ["losangeles","miami", false],
+  ["miami","newyork", false],
+];
+
+const NS="http://www.w3.org/2000/svg";
+const cablesG=document.getElementById("cables");
+const hubsG=document.getElementById("hubs");
+
+// Kabel als gebogene Linie (sieht aus wie über die Kugel gewölbt)
+CABLES.forEach(([a,b,big])=>{
+  const A=HUBS[a], B=HUBS[b];
+  const mx=(A.x+B.x)/2, my=(A.y+B.y)/2;
+  const dx=B.x-A.x, dy=B.y-A.y;
+  const len=Math.hypot(dx,dy)||1;
+  // senkrecht versetzter Kontrollpunkt = Bogen
+  const off=Math.min(len*0.18, 60);
+  const cx=mx + (-dy/len)*off;
+  const cy=my + ( dx/len)*off;
+  const p=document.createElementNS(NS,"path");
+  p.setAttribute("d",`M${A.x},${A.y} Q${cx},${cy} ${B.x},${B.y}`);
+  p.setAttribute("class", big?"cable b":"cable");
+  cablesG.appendChild(p);
+});
+
+// Knotenpunkte: Glüh-Kreis + Punkt + Beschriftung
+Object.values(HUBS).forEach(h=>{
+  const glow=document.createElementNS(NS,"circle");
+  glow.setAttribute("cx",h.x); glow.setAttribute("cy",h.y);
+  glow.setAttribute("r",6); glow.setAttribute("class","hub-glow");
+  hubsG.appendChild(glow);
+
+  const dot=document.createElementNS(NS,"circle");
+  dot.setAttribute("cx",h.x); dot.setAttribute("cy",h.y);
+  dot.setAttribute("r",3.2); dot.setAttribute("class","hub");
+  hubsG.appendChild(dot);
+
+  const t=document.createElementNS(NS,"text");
+  t.setAttribute("x",h.x + (h.dx||6));
+  t.setAttribute("y",h.y + (h.dy||-6));
+  t.setAttribute("class","hub-label");
+  t.setAttribute("text-anchor", h.anchor||"start");
+  t.textContent=h.name;
+  hubsG.appendChild(t);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wie das Internet auf der Welt aufgebaut ist</title>
+<style>
+  :root{
+    --bg:#0b1020; --panel:#141b32; --border:#2a3458;
+    --text:#e8ecf7; --muted:#9aa6c8; --accent:#4ea8ff; --accent2:#34d399;
+    --warn:#fbbf24;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+    background:radial-gradient(1200px 600px at 70% -10%, #16224a 0%, var(--bg) 60%);
+    color:var(--text); line-height:1.55;
+  }
+  header{
+    text-align:center; padding:48px 20px 24px;
+  }
+  header h1{font-size:clamp(26px,4vw,40px); margin:0 0 8px}
+  header p{color:var(--muted); max-width:620px; margin:0 auto}
+  .wrap{max-width:1000px; margin:0 auto; padding:20px 18px 80px}
+
+  .vok{
+    display:inline-block; font-size:13px; color:var(--accent2);
+    background:#0e1a2e; border:1px solid var(--border); border-radius:999px;
+    padding:2px 10px; margin:2px 4px 2px 0;
+  }
+  .vok b{color:var(--text)}
+  .vok i{color:var(--muted); font-style:normal}
+
+  /* Schicht-Karten als gestapelte Treppe */
+  .layer{
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:16px; padding:20px 22px; margin:0 auto 14px;
+    position:relative; box-shadow:0 10px 30px rgba(0,0,0,.25);
+  }
+  .layer .num{
+    position:absolute; top:-14px; left:18px;
+    width:30px; height:30px; border-radius:50%;
+    background:var(--accent); color:#04101f; font-weight:800;
+    display:grid; place-items:center; font-size:15px;
+  }
+  .layer h2{margin:4px 0 6px; font-size:20px}
+  .layer .pic{font-size:38px; float:right; margin:-6px 0 0 14px}
+  .layer p{margin:6px 0; color:#cdd6ef}
+  .layer small{color:var(--muted)}
+
+  /* Treppen-Optik: jede Schicht leicht eingerückt */
+  .l1{max-width:760px}
+  .l2{max-width:800px}
+  .l3{max-width:840px}
+  .l4{max-width:880px}
+  .l5{max-width:920px}
+  .l6{max-width:960px}
+  .l7{max-width:1000px}
+
+  .arrow{text-align:center; color:var(--accent); font-size:26px; margin:2px 0}
+
+  /* Globus / Kabel-Bild */
+  .globe-card{
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:18px; padding:24px; margin:30px 0; text-align:center;
+  }
+  .globe{
+    width:240px; height:240px; margin:10px auto; border-radius:50%;
+    background:
+      radial-gradient(40px 40px at 70% 30%, #1f6feb55, transparent),
+      radial-gradient(circle at 50% 50%, #123, #0a1730);
+    border:2px solid var(--accent); position:relative; overflow:hidden;
+    box-shadow:0 0 60px #1f6feb44, inset 0 0 40px #00040f;
+  }
+  .globe::before,.globe::after{
+    content:""; position:absolute; inset:0; border-radius:50%;
+    border:1px dashed #ffffff22;
+  }
+  .globe::after{transform:scaleX(.5)}
+  .cable{
+    position:absolute; height:2px; background:linear-gradient(90deg,transparent,var(--accent2),transparent);
+    top:50%; left:0; right:0; opacity:.8;
+  }
+  .cable.c2{top:35%; transform:rotate(-18deg)}
+  .cable.c3{top:65%; transform:rotate(16deg)}
+  .dot{position:absolute; width:9px; height:9px; border-radius:50%; background:var(--warn);
+    box-shadow:0 0 10px var(--warn)}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin:18px 0}
+  .mini{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:16px}
+  .mini .e{font-size:30px}
+  .mini h3{margin:8px 0 4px; font-size:16px}
+  .mini p{margin:0; color:var(--muted); font-size:14px}
+
+  .flow{
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
+    gap:8px; background:var(--panel); border:1px solid var(--border);
+    border-radius:14px; padding:18px; margin:20px 0; font-size:14px;
+  }
+  .flow .step{background:#0e1a2e; border:1px solid var(--border); border-radius:10px; padding:8px 12px}
+  .flow .gt{color:var(--accent); font-weight:800}
+
+  h2.section{margin:48px 0 10px; font-size:22px; border-left:4px solid var(--accent); padding-left:12px}
+  footer{text-align:center; color:var(--muted); padding:30px; font-size:13px}
+</style>
+</head>
+<body>
+<nav id="atlasnav" style="position:sticky;top:0;z-index:99999;display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;background:#070d18;border-bottom:1px solid #1b2742;font-family:system-ui,-apple-system,sans-serif;font-size:13px"><a href="index.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">📊 Übersicht</a><a href="aufbau.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">📖 Aufbau</a><a href="weltkarte.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">🗺️ Weltkarte</a><a href="globus.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">🌍 Globus</a><a href="flachkarte.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">🛰️ Flache Karte</a></nav>
+
+
+<header>
+  <h1>🌍 Wie das Internet auf der Welt aufgebaut ist</h1>
+  <p>Stell es dir wie ein <b>Straßennetz</b> vor: dein Haus, deine Straße, die Autobahn, und die riesigen Kabel über die ganze Erde. Wir gehen Schicht für Schicht von innen nach außen.</p>
+</header>
+
+<div class="wrap">
+
+  <h2 class="section">Teil 1 — Von deinem Gerät bis zur Welt (die Schichten)</h2>
+
+  <div class="layer l1">
+    <span class="num">1</span>
+    <span class="pic">📱</span>
+    <h2>Dein Gerät</h2>
+    <p>Handy, Laptop, Fernseher. Jedes bekommt eine Nummer-Adresse, damit man es findet.</p>
+    <small>
+      <span class="vok"><b>Device</b> <i>diss-wais</i> = Gerät</span>
+      <span class="vok"><b>IP&nbsp;Address</b> <i>ai-pi a-dress</i> = Geräte-Adresse</span>
+    </small>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="layer l2">
+    <span class="num">2</span>
+    <span class="pic">📶</span>
+    <h2>Dein Heimnetz (Router)</h2>
+    <p>Der Router zu Hause ist die <b>Tür deiner Wohnung</b> ins Internet. WLAN/Kabel verbinden alle deine Geräte mit ihm.</p>
+    <small>
+      <span class="vok"><b>Router</b> <i>ruu-ter</i> = Verteiler / Tür nach draußen</span>
+      <span class="vok"><b>Network</b> <i>nett-wörk</i> = Netz</span>
+    </small>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="layer l3">
+    <span class="num">3</span>
+    <span class="pic">🏢</span>
+    <h2>Dein Anbieter (ISP)</h2>
+    <p>Telekom, Vodafone, o2 … Sie betreiben die <b>Straße vor deinem Haus</b> und bringen dich ans große Netz.</p>
+    <small>
+      <span class="vok"><b>ISP</b> <i>ai-ess-pi</i> = Internet-Anbieter (Internet Service Provider)</span>
+      <span class="vok"><b>Provider</b> <i>pro-wai-der</i> = Anbieter</span>
+    </small>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="layer l4">
+    <span class="num">4</span>
+    <span class="pic">🛣️</span>
+    <h2>Das Backbone (die Autobahnen)</h2>
+    <p>Dicke Glasfaser-Leitungen zwischen Städten und Ländern. Hier rast der Verkehr von Millionen Menschen.</p>
+    <small>
+      <span class="vok"><b>Backbone</b> <i>bäck-boun</i> = Rückgrat / Haupt-Leitung</span>
+      <span class="vok"><b>Fiber</b> <i>fai-ber</i> = Glasfaser</span>
+    </small>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="layer l5">
+    <span class="num">5</span>
+    <span class="pic">🔀</span>
+    <h2>Knotenpunkte (IXP)</h2>
+    <p>Große <b>Kreuzungen</b>, wo viele Anbieter sich treffen und Daten tauschen. Der bekannteste der Welt steht in <b>Frankfurt (DE-CIX)</b>.</p>
+    <small>
+      <span class="vok"><b>Exchange</b> <i>iks-tschehndsch</i> = Austausch / Tausch-Punkt</span>
+      <span class="vok"><b>IXP</b> = Internet-Knotenpunkt</span>
+    </small>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="layer l6">
+    <span class="num">6</span>
+    <span class="pic">🌊</span>
+    <h2>Tiefsee-Kabel</h2>
+    <p>Über <b>500 Kabel</b> liegen am Meeresboden zwischen den Kontinenten. ~<b>95 % des weltweiten Verkehrs</b> laufen durch sie — nicht über Satelliten!</p>
+    <small>
+      <span class="vok"><b>Submarine Cable</b> <i>ssab-ma-rien kei-bl</i> = Untersee-Kabel</span>
+      <span class="vok"><b>Continent</b> <i>kon-ti-nent</i> = Kontinent</span>
+    </small>
+  </div>
+  <div class="arrow">↓</div>
+
+  <div class="layer l7">
+    <span class="num">7</span>
+    <span class="pic">🏬</span>
+    <h2>Rechenzentren (Data Center)</h2>
+    <p>Riesige Hallen voller Server. Hier <b>wohnt</b> die Webseite (Google, YouTube, dein Lieblingsshop). Dein Gerät holt sich von hier die Daten.</p>
+    <small>
+      <span class="vok"><b>Server</b> <i>ssör-wer</i> = Diener-Computer</span>
+      <span class="vok"><b>Data Center</b> <i>dei-ta ssen-ter</i> = Rechenzentrum</span>
+    </small>
+  </div>
+
+  <h2 class="section">Teil 2 — Das Bild der ganzen Erde</h2>
+  <div class="globe-card">
+    <p style="color:var(--muted);margin-top:0">Kontinente (gelbe Punkte) sind durch Kabel im Meer verbunden:</p>
+    <div class="globe">
+      <span class="cable c1"></span>
+      <span class="cable c2"></span>
+      <span class="cable c3"></span>
+      <span class="dot" style="top:30%;left:30%"></span>
+      <span class="dot" style="top:45%;left:62%"></span>
+      <span class="dot" style="top:62%;left:40%"></span>
+      <span class="dot" style="top:55%;left:75%"></span>
+      <span class="dot" style="top:35%;left:50%"></span>
+    </div>
+    <p style="color:var(--muted)">Jeder Punkt = eine Region voller Rechenzentren &amp; Knotenpunkte. Die Linien = Tiefsee-Kabel.</p>
+  </div>
+
+  <h2 class="section">Teil 3 — Was passiert, wenn du eine Seite öffnest?</h2>
+  <div class="flow">
+    <span class="step">📱 Du tippst <b>youtube.com</b></span>
+    <span class="gt">→</span>
+    <span class="step">📖 DNS findet die Adresse <small>(wie ein Telefonbuch)</small></span>
+    <span class="gt">→</span>
+    <span class="step">📶 Router</span>
+    <span class="gt">→</span>
+    <span class="step">🏢 Anbieter</span>
+    <span class="gt">→</span>
+    <span class="step">🛣️ Autobahn</span>
+    <span class="gt">→</span>
+    <span class="step">🌊 evtl. Kabel ums Meer</span>
+    <span class="gt">→</span>
+    <span class="step">🏬 Server antwortet</span>
+    <span class="gt">→</span>
+    <span class="step">📱 Bild auf deinem Schirm</span>
+  </div>
+  <p style="text-align:center;color:var(--muted)">Das alles dauert oft <b>weniger als eine Sekunde</b>.</p>
+
+  <h2 class="section">Teil 4 — Wichtige Begriffe auf einen Blick</h2>
+  <div class="grid">
+    <div class="mini"><div class="e">📖</div><h3>DNS</h3><p>Das Telefonbuch des Internets: macht aus dem Namen (google.de) die Nummer-Adresse.</p></div>
+    <div class="mini"><div class="e">📦</div><h3>Paket / Packet</h3><p>Daten werden in kleine Päckchen zerlegt und einzeln verschickt — wie viele kleine Briefe.</p></div>
+    <div class="mini"><div class="e">🤝</div><h3>Protokoll (TCP/IP)</h3><p>Die gemeinsamen "Verkehrsregeln", damit alle Geräte sich verstehen.</p></div>
+    <div class="mini"><div class="e">🔒</div><h3>HTTPS</h3><p>Das Schloss-Symbol: die Verbindung ist verschlüsselt = niemand liest mit.</p></div>
+    <div class="mini"><div class="e">☁️</div><h3>Cloud</h3><p>Nur ein schönes Wort für: "fremde Server in einem Rechenzentrum".</p></div>
+    <div class="mini"><div class="e">⚡</div><h3>CDN</h3><p>Kopien der Webseite nah bei dir — damit es schneller lädt.</p></div>
+  </div>
+
+  <div class="globe-card" style="text-align:left">
+    <h2 style="margin-top:0">🧠 In einem Satz</h2>
+    <p style="color:#cdd6ef;margin:0">Das Internet ist kein "Ding in der Luft", sondern ein <b>weltweites Netz aus echten Kabeln, Routern und Server-Hallen</b> — verbunden über Autobahnen aus Glasfaser und dicke Kabel auf dem Meeresboden.</p>
+  </div>
+
+</div>
+
+<footer>Erstellt für Hasan · bildliche Erklärung · Datei auf dem Desktop</footer>
+</body>
+</html>
