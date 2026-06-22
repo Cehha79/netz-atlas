@@ -117,10 +117,12 @@
     letter-spacing:.3px; pointer-events:none}
   .maptitle{position:absolute; left:16px; top:14px; pointer-events:none}
   .maptitle b{font-size:13px; letter-spacing:.4px} .maptitle span{display:block; color:var(--muted); font-size:11px; margin-top:2px}
-  .ticker{border-top:1px solid var(--border); background:#070d18; padding:10px 16px;
-    display:flex; gap:30px; overflow:hidden; white-space:nowrap; color:var(--muted); font-size:12.5px}
-  .ticker .t{display:inline-flex; gap:8px; align-items:center}
-  .ticker .t b{color:var(--teal); font-family:var(--mono)}
+  .sitefoot{border-top:1px solid var(--border); background:#070d18; padding:14px 16px;
+    display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap;
+    color:var(--muted); font-size:13px; letter-spacing:.2px}
+  .sitefoot a{color:var(--teal); text-decoration:none; font-weight:700}
+  .sitefoot a:hover{text-decoration:underline}
+  .sitefoot .dot{color:var(--dim)}
 
   @media(max-width:1100px){
     .layout{grid-template-columns:1fr}
@@ -191,6 +193,16 @@
       <a class="clink" href="https://de.wikipedia.org/wiki/Internet-Knoten" target="_blank" rel="noopener">📖 Internet-Knoten ↗</a>
     </div>
 
+    <div class="card amber">
+      <h2><span class="ic">💡</span> Wusstest du?</h2>
+      <div class="stat"><span class="k">Tiefster Punkt eines Kabels</span><span class="v">~8.000<span class="u">m</span></span></div>
+      <div class="stat"><span class="k">Erstes Transatlantik-Kabel</span><span class="v">1858</span></div>
+      <div class="stat"><span class="k">Daten in einer Faser</span><span class="v">&gt;100<span class="u">Tbit/s</span></span></div>
+      <div class="stat"><span class="k">Reparatur-Spezialschiffe</span><span class="v">~60</span></div>
+      <div class="stat"><span class="k">Anteil per Satellit</span><span class="v">&lt;1<span class="u">%</span></span></div>
+      <div class="stat"><span class="k">Lebensdauer eines Kabels</span><span class="v">~25<span class="u">Jahre</span></span></div>
+    </div>
+
     <div class="card links">
       <h2><span class="ic">🔗</span> Wichtige Links</h2>
       <div class="sub">Die besten Quellen, um tiefer einzutauchen — alle öffnen in einem neuen Tab.</div>
@@ -229,7 +241,10 @@
       <div class="maplabel" id="maplabel">Schematische Darstellung · Routen repräsentativ · 👆 Knoten anklicken für die Laufzeit dorthin</div>
       <div class="routebox" id="routebox" style="display:none"></div>
     </div>
-    <div class="ticker" id="ticker"></div>
+    <div class="sitefoot">
+      <span>🌐 Internet-Atlas</span><span class="dot">·</span>
+      <span>ein Projekt von <a href="https://mikatec.de" target="_blank" rel="noopener">MikaTec.de</a></span>
+    </div>
   </div>
 
   <!-- ============ RECHTS: Live ============ -->
@@ -706,17 +721,7 @@ setInterval(measureUpload, 25000);
     document.getElementById("landingCount").textContent=lp.features.length.toLocaleString("de-DE");
 })();
 
-// Laufband
-const FACTS=[
- ["Tiefster Punkt eines Kabels","~8.000 m"],
- ["Erstes Transatlantik-Kabel","1858"],
- ["Daten in einer einzigen Faser",">100 Tbit/s"],
- ["Reparatur-Spezialschiffe weltweit","~60"],
- ["Anteil per Satellit","< 1 %"],
- ["Lebensdauer eines Seekabels","~25 Jahre"]
-];
-document.getElementById("ticker").innerHTML=
-  FACTS.concat(FACTS).map(f=>`<span class="t">${f[0]} <b>${f[1]}</b></span>`).join("");
+// (Fakten stehen jetzt als Panel in der linken Spalte)
 </script>
 </body>
 </html>
