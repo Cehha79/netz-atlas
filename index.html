@@ -37,7 +37,8 @@
   .layout{flex:1; min-height:0; display:grid; grid-template-columns:360px minmax(0,1fr) 380px; grid-template-rows:1fr; gap:1px;
     background:var(--border)}
   .col{background:var(--bg); overflow-y:auto; min-height:0}
-  .col.left,.col.right{padding:16px}
+  .col.left,.col.right{padding:16px; display:flex; flex-direction:column; gap:14px}
+  .col.left .card,.col.right .card{flex:1 0 auto; margin-bottom:0; display:flex; flex-direction:column}
   .col.center{padding:0; display:flex; flex-direction:column; background:#05080f}
 
   /* ---------- Karten ---------- */
@@ -69,13 +70,17 @@
   .links .ld{font-size:11.5px; color:var(--muted); line-height:1.4; margin-top:2px}
   .links .ext{margin-left:auto; color:var(--dim); font-size:12px; flex:none; margin-top:2px}
 
-  .stat{display:flex; align-items:baseline; justify-content:space-between; padding:5px 0;
+  .rows{display:flex; flex-direction:column}
+  .card>.rows{flex:1 1 auto; margin:2px 0}
+  .stat{display:grid; grid-template-columns:1fr auto; column-gap:12px; align-items:center; padding:6px 0;
     border-bottom:1px dashed #16203a}
+  .rows>.stat{flex:1 1 0; min-height:30px}
   .stat:last-child{border-bottom:0}
   .stat .k{color:var(--muted); font-size:13px}
-  .stat .v{font-family:var(--mono); font-size:14px; color:var(--text); font-variant-numeric:tabular-nums}
+  .stat .v{font-family:var(--mono); font-size:14px; color:var(--text); font-variant-numeric:tabular-nums; text-align:right}
   .stat .v.big{font-size:22px; font-weight:600}
-  .stat .v .u{font-size:11px; color:var(--dim); margin-left:3px}
+  .stat .v .u{display:inline-block; min-width:22px; text-align:left; font-size:11px; color:var(--dim); margin-left:4px}
+  #cIp{white-space:normal; word-break:break-all; font-size:12px; line-height:1.35}
 
   .hero{text-align:center; padding:2px 0 7px}
   .hero .n{font-family:var(--mono); font-size:30px; font-weight:700; line-height:1;
@@ -185,10 +190,12 @@
     <div class="card">
       <h2><span class="ic">🛰️</span> Das Netz in Zahlen</h2>
       <div class="hero"><div class="n" id="cableCount">694</div><div class="l">aktive Seekabel weltweit · <span id="cableStat" style="color:var(--dim)">Stand Juni 2026</span></div></div>
-      <div class="stat"><span class="k">Gesamtlänge der Kabel</span><span class="v">~1,48 Mio<span class="u">km</span></span></div>
-      <div class="stat"><span class="k">Verkehr über Seekabel</span><span class="v">~95<span class="u">%</span></span></div>
-      <div class="stat"><span class="k">Anlandungs-Stationen</span><span class="v" id="landingCount">1.916</span></div>
-      <div class="stat"><span class="k">Knotenpunkte (IXP)</span><span class="v">~1.000</span></div>
+      <div class="rows">
+        <div class="stat"><span class="k">Gesamtlänge der Kabel</span><span class="v">~1,48 Mio<span class="u">km</span></span></div>
+        <div class="stat"><span class="k">Verkehr über Seekabel</span><span class="v">~95<span class="u">%</span></span></div>
+        <div class="stat"><span class="k">Anlandungs-Stationen</span><span class="v" id="landingCount">1.916</span></div>
+        <div class="stat"><span class="k">Knotenpunkte (IXP)</span><span class="v">~1.000</span></div>
+      </div>
       <a class="clink" href="https://www.submarinecablemap.com/" target="_blank" rel="noopener">🌍 Echte Welt-Kabelkarte ↗</a>
       <a class="clink" href="https://de.wikipedia.org/wiki/Seekabel" target="_blank" rel="noopener">📖 Seekabel erklärt ↗</a>
     </div>
@@ -196,11 +203,13 @@
     <div class="card amber">
       <h2><span class="ic">⏱️</span> Typische Laufzeiten</h2>
       <div class="note" style="margin:0 0 8px">Hin- und Rückweg (Round-Trip) über Glasfaser</div>
-      <div class="stat"><span class="k">Frankfurt ↔ London</span><span class="v">~14<span class="u">ms</span></span></div>
-      <div class="stat"><span class="k">Frankfurt ↔ New York</span><span class="v">~85<span class="u">ms</span></span></div>
-      <div class="stat"><span class="k">Frankfurt ↔ Singapur</span><span class="v">~160<span class="u">ms</span></span></div>
-      <div class="stat"><span class="k">Frankfurt ↔ Tokio</span><span class="v">~230<span class="u">ms</span></span></div>
-      <div class="stat"><span class="k">Frankfurt ↔ Sydney</span><span class="v">~280<span class="u">ms</span></span></div>
+      <div class="rows">
+        <div class="stat"><span class="k">Frankfurt ↔ London</span><span class="v">~14<span class="u">ms</span></span></div>
+        <div class="stat"><span class="k">Frankfurt ↔ New York</span><span class="v">~85<span class="u">ms</span></span></div>
+        <div class="stat"><span class="k">Frankfurt ↔ Singapur</span><span class="v">~160<span class="u">ms</span></span></div>
+        <div class="stat"><span class="k">Frankfurt ↔ Tokio</span><span class="v">~230<span class="u">ms</span></span></div>
+        <div class="stat"><span class="k">Frankfurt ↔ Sydney</span><span class="v">~280<span class="u">ms</span></span></div>
+      </div>
       <a class="clink" href="https://de.wikipedia.org/wiki/Latenzzeit" target="_blank" rel="noopener">📖 Latenz erklärt ↗</a>
       <a class="clink" href="https://wondernetwork.com/pings" target="_blank" rel="noopener">⏱️ Welt-Ping-Tabelle ↗</a>
     </div>
@@ -230,11 +239,13 @@
         <div class="ring">📍</div>
         <div class="t"><b id="cLoc">wird ermittelt…</b><span id="cIsp">Anbieter wird geladen…</span></div>
       </div>
-      <div class="stat"><span class="k">IP-Adresse</span><span class="v" id="cIp">—</span></div>
-      <div class="stat"><span class="k">Verbindungstyp</span><span class="v" id="cType">—</span></div>
-      <div class="stat"><span class="k">Geschätztes Tempo</span><span class="v" id="cDown">—</span></div>
-      <div class="bar"><i id="cDownBar"></i></div>
-      <div class="stat"><span class="k">Geschätzte Laufzeit</span><span class="v" id="cRtt">—</span></div>
+      <div class="rows">
+        <div class="stat"><span class="k">IP-Adresse</span><span class="v" id="cIp">—</span></div>
+        <div class="stat"><span class="k">Verbindungstyp</span><span class="v" id="cType">—</span></div>
+        <div class="stat"><span class="k">Geschätztes Tempo</span><span class="v" id="cDown">—</span></div>
+        <div class="bar"><i id="cDownBar"></i></div>
+        <div class="stat"><span class="k">Geschätzte Laufzeit</span><span class="v" id="cRtt">—</span></div>
+      </div>
       <div class="note" id="cNote">Werte kommen direkt aus deinem Browser und einem öffentlichen Standort-Dienst.</div>
     </div>
 
@@ -243,10 +254,12 @@
       <div class="sub">Wie <b>schnell &amp; stabil</b> dein Anschluss gerade ist — gerade eben gegen einen Server gemessen: Antwortzeit, Tempo runter/rauf und Schwankung.</div>
       <div class="hero"><div class="n" id="liveLat">—</div><div class="l">Ping / Latenz · live gemessen (ms)</div></div>
       <canvas id="spark" class="spark"></canvas>
-      <div class="stat"><span class="k">Download (gemessen)</span><span class="v" id="liveDown">messe…</span></div>
-      <div class="stat"><span class="k">Upload (gemessen)</span><span class="v" id="liveUp">messe…</span></div>
-      <div class="stat"><span class="k">Schwankung (Jitter)</span><span class="v" id="liveJit">—</span></div>
-      <div class="stat"><span class="k">Bewertung</span><span class="v" id="liveGrade">—</span></div>
+      <div class="rows">
+        <div class="stat"><span class="k">Download (gemessen)</span><span class="v" id="liveDown">messe…</span></div>
+        <div class="stat"><span class="k">Upload (gemessen)</span><span class="v" id="liveUp">messe…</span></div>
+        <div class="stat"><span class="k">Schwankung (Jitter)</span><span class="v" id="liveJit">—</span></div>
+        <div class="stat"><span class="k">Bewertung</span><span class="v" id="liveGrade">—</span></div>
+      </div>
       <div class="note" id="liveNote">Echte Messung gegen ein weltweites Server-Netz (Cloudflare). Läuft automatisch.</div>
     </div>
 
