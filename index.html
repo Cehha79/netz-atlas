@@ -148,10 +148,16 @@
   .navsep{width:1px;background:#22314f;margin:2px 4px;align-self:stretch}
   .ov{position:fixed;inset:0;background:rgba(4,8,15,.72);backdrop-filter:blur(3px);display:none;align-items:flex-start;justify-content:center;padding:5vh 16px 16px;z-index:100000;overflow:auto}
   .ov.open{display:flex}
-  .ovbox{position:relative;max-width:640px;width:100%;background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:14px 16px 16px}
+  .ovbox{position:relative;max-width:920px;width:100%;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:16px 18px 18px}
+  #ovbody>div{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;align-items:start}
   .ovhead{font-size:12px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);font-weight:600;margin:0 0 12px;padding-right:34px}
-  .ovbox .card{margin:0 0 12px}
-  .ovbox .card:last-child{margin:0}
+  .ovbox .card{margin:0; padding:14px 16px}
+  .ovbox .card h2{font-size:12px; margin-bottom:10px}
+  .ovbox .card .sub{font-size:12.5px; margin:-3px 0 10px}
+  .ovbox .stat{padding:6px 0}
+  .ovbox .stat .k{font-size:13.5px}
+  .ovbox .stat .v{font-size:14.5px}
+  .ovhead{font-size:13px}
   .ovx{position:absolute;top:12px;right:14px;background:#101a30;border:1px solid var(--border);color:var(--text);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:15px}
   .ovx:hover{background:#16233d}
 </style>
@@ -248,6 +254,105 @@
   </div>
 </div>
 
+<footer class="sitefoot">
+  <a class="fbrand" href="https://www.mika-tec.com" target="_blank" rel="noopener"><span class="by">by</span> <b>Mika-Tec</b> <span class="dot">·</span> <span class="url">www.mika-tec.com</span></a>
+  <nav class="flinks">
+    <a href="https://mika-tec.com/impressum.html" target="_blank" rel="noopener">Impressum</a>
+    <a href="https://mika-tec.com/datenschutz.html" target="_blank" rel="noopener">Datenschutz</a>
+    <a href="https://mika-tec.com/kontakt.html" target="_blank" rel="noopener">Kontakt</a>
+    <span class="dot">·</span>
+    <a class="fact" href="mailto:cehha79@gmail.com?subject=Feedback%20zu%20Netz-Atlas">💬 Feedback</a>
+    <a class="fact donate" href="https://paypal.me/mikatec" target="_blank" rel="noopener">♥ Spenden</a>
+  </nav>
+</footer>
+<div class="ov" id="ov"><div class="ovbox"><div class="ovhead" id="ovhead"></div><button class="ovx" onclick="closeOv()" aria-label="Schliessen">✕</button><div id="ovbody"></div></div></div>
+<div id="ovstash" hidden><div data-ovgroup="wissen">    <div class="card blue glossary">
+      <h2><span class="ic">📖</span> Fachbegriffe</h2>
+      <div class="note" style="margin:-6px 0 10px">Tippe auf einen Begriff → öffnet die Erklärung bei Wikipedia.</div>
+      <div class="row"><a class="term" href="https://de.wikipedia.org/wiki/Backbone-Netz" target="_blank" rel="noopener">Backbone ↗</a><span class="ipa">bäck-boun</span><div class="def">Das „Rückgrat": die großen Haupt-Leitungen, die alles tragen.</div></div>
+      <div class="row"><a class="term" href="https://de.wikipedia.org/wiki/Seekabel" target="_blank" rel="noopener">Submarine Cable ↗</a><span class="ipa">ssab-ma-rien kei-bl</span><div class="def">Seekabel — Glasfaser-Bündel am Meeresboden.</div></div>
+      <div class="row"><a class="term" href="https://de.wikipedia.org/wiki/Internet-Knoten" target="_blank" rel="noopener">IXP ↗</a><span class="ipa">ai-eks-pi</span><div class="def">Internet Exchange Point — die Kreuzung, wo Anbieter Daten tauschen.</div></div>
+      <div class="row"><a class="term" href="https://de.wikipedia.org/wiki/Latenzzeit" target="_blank" rel="noopener">Latency ↗</a><span class="ipa">lei-tn-si</span><div class="def">Laufzeit — wie lange ein Signal für den Weg braucht.</div></div>
+      <div class="row"><a class="term" href="https://de.wikipedia.org/wiki/Daten%C3%BCbertragungsrate" target="_blank" rel="noopener">Bandwidth ↗</a><span class="ipa">bänd-witth</span><div class="def">Bandbreite — wie viele Daten gleichzeitig durchpassen.</div></div>
+    </div>
+    <div class="card links">
+      <h2><span class="ic">🔗</span> Wichtige Links</h2>
+      <div class="sub">Die besten Quellen, um tiefer einzutauchen — alle öffnen in einem neuen Tab.</div>
+      <a href="https://www.submarinecablemap.com/" target="_blank" rel="noopener">
+        <span class="ic2">🌍</span><span><span class="lt">Submarine Cable Map</span><span class="ld">Die offizielle Welt-Karte aller Seekabel (TeleGeography).</span></span><span class="ext">↗</span></a>
+      <a href="https://radar.cloudflare.com/" target="_blank" rel="noopener">
+        <span class="ic2">📊</span><span><span class="lt">Cloudflare Radar</span><span class="ld">Live-Statistiken zum weltweiten Internet-Verkehr.</span></span><span class="ext">↗</span></a>
+      <a href="https://pulse.internetsociety.org/" target="_blank" rel="noopener">
+        <span class="ic2">🩺</span><span><span class="lt">Internet Society Pulse</span><span class="ld">Gesundheit & Ausfälle des Internets weltweit.</span></span><span class="ext">↗</span></a>
+      <a href="https://www.peeringdb.com/" target="_blank" rel="noopener">
+        <span class="ic2">🔌</span><span><span class="lt">PeeringDB</span><span class="ld">Datenbank aller Knotenpunkte & Rechenzentren.</span></span><span class="ext">↗</span></a>
+      <a href="https://speed.cloudflare.com/" target="_blank" rel="noopener">
+        <span class="ic2">⚡</span><span><span class="lt">Cloudflare Speedtest</span><span class="ld">Offizieller Geschwindigkeits-Test (Vergleich zu oben).</span></span><span class="ext">↗</span></a>
+      <a href="https://de.wikipedia.org/wiki/Internet" target="_blank" rel="noopener">
+        <span class="ic2">📖</span><span><span class="lt">Wikipedia: Internet</span><span class="ld">Der große Überblick — wie alles zusammenhängt.</span></span><span class="ext">↗</span></a>
+    </div>
+    <div class="card links">
+      <h2><span class="ic">📑</span> Quellen & Stand</h2>
+      <div class="sub">Woher die Zahlen oben stammen. Es sind gerundete Richtwerte — die echten Zahlen ändern sich laufend.</div>
+      <a href="https://www.submarinecablemap.com/" target="_blank" rel="noopener">
+        <span class="ic2">🌍</span><span><span class="lt">TeleGeography</span><span class="ld">Anzahl & Länge der Seekabel, Anlandungs-Stationen.</span></span><span class="ext">↗</span></a>
+      <a href="https://www.peeringdb.com/" target="_blank" rel="noopener">
+        <span class="ic2">🔌</span><span><span class="lt">PeeringDB</span><span class="ld">Zahl der Knotenpunkte (IXP) weltweit.</span></span><span class="ext">↗</span></a>
+      <a href="https://wondernetwork.com/pings" target="_blank" rel="noopener">
+        <span class="ic2">⏱️</span><span><span class="lt">WonderNetwork Pings</span><span class="ld">Typische Laufzeiten zwischen Städten.</span></span><span class="ext">↗</span></a>
+      <div class="note" style="margin-top:10px">Die Angabe „~95 % über Seekabel" ist ein in der Branche gängiger Richtwert (u. a. ITU). Stand der Seite: Juni 2026.</div>
+    </div>
+    <div class="card blue">
+      <h2><span class="ic">🏙️</span> Große Knotenpunkte</h2>
+      <div class="stat"><span class="k">🇩🇪 Frankfurt (DE-CIX)</span><span class="v">#1 Welt</span></div>
+      <div class="stat"><span class="k">🇸🇬 Singapur</span><span class="v">Asien-Tor</span></div>
+      <div class="stat"><span class="k">🇧🇷 Fortaleza</span><span class="v">Süd-Tor</span></div>
+      <div class="stat"><span class="k">🇺🇸 New York / Virginia</span><span class="v">Atlantik</span></div>
+      <div class="stat"><span class="k">🇦🇪 Dubai</span><span class="v">Nahost-Drehkreuz</span></div>
+      <a class="clink" href="https://www.de-cix.net/en/locations/frankfurt/statistics" target="_blank" rel="noopener">📈 DE-CIX Live-Verkehr ↗</a>
+      <a class="clink" href="https://de.wikipedia.org/wiki/Internet-Knoten" target="_blank" rel="noopener">📖 Internet-Knoten ↗</a>
+    </div>
+    <div class="card amber">
+      <h2><span class="ic">💡</span> Wusstest du?</h2>
+      <div class="stat"><span class="k">Tiefster Punkt eines Kabels</span><span class="v">~8.000<span class="u">m</span></span></div>
+      <div class="stat"><span class="k">Erstes Transatlantik-Kabel</span><span class="v">1858</span></div>
+      <div class="stat"><span class="k">Daten in einer Faser</span><span class="v">&gt;100<span class="u">Tbit/s</span></span></div>
+      <div class="stat"><span class="k">Reparatur-Spezialschiffe</span><span class="v">~60</span></div>
+      <div class="stat"><span class="k">Anteil per Satellit</span><span class="v">&lt;1<span class="u">%</span></span></div>
+      <div class="stat"><span class="k">Lebensdauer eines Kabels</span><span class="v">~25<span class="u">Jahre</span></span></div>
+    </div>
+</div><div data-ovgroup="system">    <div class="card blue">
+      <h2><span class="ic">🔌</span> Netzwerk-Details</h2>
+      <div class="sub"><b>Womit</b> du verbunden bist: ob du online bist, ob über <b>WLAN, Mobilfunk oder Kabel</b>, und welche Netz-Generation (z. B. 4G).</div>
+      <div class="stat"><span class="k">Status</span><span class="v" id="nOnline">—</span></div>
+      <div class="stat"><span class="k">Verbindungsart</span><span class="v" id="nType">—</span></div>
+      <div class="stat"><span class="k">Netz-Generation</span><span class="v" id="nGen">—</span></div>
+      <div class="stat"><span class="k">Datensparmodus</span><span class="v" id="nSave">—</span></div>
+      <div class="stat"><span class="k">Speicher (frei)</span><span class="v" id="nStore">—</span></div>
+      <div class="note">„Verbindungsart" (WLAN / Mobil / Kabel) zeigen nur manche Browser — Chrome am ehesten.</div>
+    </div>
+    <div class="card">
+      <h2><span class="ic">🖥️</span> Dein Gerät & Treiber</h2>
+      <div class="sub">Auf <b>welchem Gerät</b> du gerade surfst: Betriebssystem, Browser und die Hardware (Prozessor, Grafik-Treiber, Bildschirm).</div>
+      <div class="stat"><span class="k">Betriebssystem</span><span class="v" id="dOS">—</span></div>
+      <div class="stat"><span class="k">Browser</span><span class="v" id="dBrowser">—</span></div>
+      <div class="stat"><span class="k">Prozessor-Kerne</span><span class="v" id="dCores">—</span></div>
+      <div class="stat"><span class="k">Arbeitsspeicher</span><span class="v" id="dRam">—</span></div>
+      <div class="stat"><span class="k">Grafik / Treiber</span><span class="v" id="dGpu" style="font-size:11.5px; text-align:right; max-width:175px">—</span></div>
+      <div class="stat"><span class="k">Bildschirm</span><span class="v" id="dScreen">—</span></div>
+      <div class="stat"><span class="k">Zeitzone</span><span class="v" id="dTz" style="font-size:12px">—</span></div>
+      <div class="stat"><span class="k">Sprache</span><span class="v" id="dLang">—</span></div>
+      <div class="note">Direkt vom Browser ausgelesen. Der echte Netzwerk-Treiber-Name ist aus Sicherheitsgründen nicht abrufbar — die Grafik-Karte/Treiber schon.</div>
+    </div>
+    <div class="card amber">
+      <h2><span class="ic">📊</span> Sitzungs-Aktivität</h2>
+      <div class="sub">Was auf <b>dieser Seite</b> läuft, seit du sie geöffnet hast: gezeigte Routen, veranschaulichte Datenpakete und die Laufzeit der Ansicht.</div>
+      <div class="stat"><span class="k">Aktive Haupt-Routen</span><span class="v big" id="aRoutes">23</span></div>
+      <div class="stat"><span class="k">Datenpakete (simuliert)</span><span class="v" id="aPackets">0</span></div>
+      <div class="stat"><span class="k">Laufzeit dieser Ansicht</span><span class="v" id="aUptime">00:00</span></div>
+      <div class="note">Die Paket-Zählung veranschaulicht den Datenfluss — die Routen und Knotenpunkte sind real.</div>
+    </div>
+</div></div>
 <script>
 /* =================== KARTE =================== */
 const cv=document.getElementById("map"), ctx=cv.getContext("2d");
@@ -675,104 +780,5 @@ function closeOv(){
 document.getElementById('ov').addEventListener('click',function(e){if(e.target===this)closeOv();});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeOv();});
 </script>
-<footer class="sitefoot">
-  <a class="fbrand" href="https://www.mika-tec.com" target="_blank" rel="noopener"><span class="by">by</span> <b>Mika-Tec</b> <span class="dot">·</span> <span class="url">www.mika-tec.com</span></a>
-  <nav class="flinks">
-    <a href="https://mika-tec.com/impressum.html" target="_blank" rel="noopener">Impressum</a>
-    <a href="https://mika-tec.com/datenschutz.html" target="_blank" rel="noopener">Datenschutz</a>
-    <a href="https://mika-tec.com/kontakt.html" target="_blank" rel="noopener">Kontakt</a>
-    <span class="dot">·</span>
-    <a class="fact" href="mailto:cehha79@gmail.com?subject=Feedback%20zu%20Netz-Atlas">💬 Feedback</a>
-    <a class="fact donate" href="https://paypal.me/mikatec" target="_blank" rel="noopener">♥ Spenden</a>
-  </nav>
-</footer>
-<div class="ov" id="ov"><div class="ovbox"><div class="ovhead" id="ovhead"></div><button class="ovx" onclick="closeOv()" aria-label="Schliessen">✕</button><div id="ovbody"></div></div></div>
-<div id="ovstash" hidden><div data-ovgroup="wissen">    <div class="card blue glossary">
-      <h2><span class="ic">📖</span> Fachbegriffe</h2>
-      <div class="note" style="margin:-6px 0 10px">Tippe auf einen Begriff → öffnet die Erklärung bei Wikipedia.</div>
-      <div class="row"><a class="term" href="https://de.wikipedia.org/wiki/Backbone-Netz" target="_blank" rel="noopener">Backbone ↗</a><span class="ipa">bäck-boun</span><div class="def">Das „Rückgrat": die großen Haupt-Leitungen, die alles tragen.</div></div>
-      <div class="row"><a class="term" href="https://de.wikipedia.org/wiki/Seekabel" target="_blank" rel="noopener">Submarine Cable ↗</a><span class="ipa">ssab-ma-rien kei-bl</span><div class="def">Seekabel — Glasfaser-Bündel am Meeresboden.</div></div>
-      <div class="row"><a class="term" href="https://de.wikipedia.org/wiki/Internet-Knoten" target="_blank" rel="noopener">IXP ↗</a><span class="ipa">ai-eks-pi</span><div class="def">Internet Exchange Point — die Kreuzung, wo Anbieter Daten tauschen.</div></div>
-      <div class="row"><a class="term" href="https://de.wikipedia.org/wiki/Latenzzeit" target="_blank" rel="noopener">Latency ↗</a><span class="ipa">lei-tn-si</span><div class="def">Laufzeit — wie lange ein Signal für den Weg braucht.</div></div>
-      <div class="row"><a class="term" href="https://de.wikipedia.org/wiki/Daten%C3%BCbertragungsrate" target="_blank" rel="noopener">Bandwidth ↗</a><span class="ipa">bänd-witth</span><div class="def">Bandbreite — wie viele Daten gleichzeitig durchpassen.</div></div>
-    </div>
-    <div class="card links">
-      <h2><span class="ic">🔗</span> Wichtige Links</h2>
-      <div class="sub">Die besten Quellen, um tiefer einzutauchen — alle öffnen in einem neuen Tab.</div>
-      <a href="https://www.submarinecablemap.com/" target="_blank" rel="noopener">
-        <span class="ic2">🌍</span><span><span class="lt">Submarine Cable Map</span><span class="ld">Die offizielle Welt-Karte aller Seekabel (TeleGeography).</span></span><span class="ext">↗</span></a>
-      <a href="https://radar.cloudflare.com/" target="_blank" rel="noopener">
-        <span class="ic2">📊</span><span><span class="lt">Cloudflare Radar</span><span class="ld">Live-Statistiken zum weltweiten Internet-Verkehr.</span></span><span class="ext">↗</span></a>
-      <a href="https://pulse.internetsociety.org/" target="_blank" rel="noopener">
-        <span class="ic2">🩺</span><span><span class="lt">Internet Society Pulse</span><span class="ld">Gesundheit & Ausfälle des Internets weltweit.</span></span><span class="ext">↗</span></a>
-      <a href="https://www.peeringdb.com/" target="_blank" rel="noopener">
-        <span class="ic2">🔌</span><span><span class="lt">PeeringDB</span><span class="ld">Datenbank aller Knotenpunkte & Rechenzentren.</span></span><span class="ext">↗</span></a>
-      <a href="https://speed.cloudflare.com/" target="_blank" rel="noopener">
-        <span class="ic2">⚡</span><span><span class="lt">Cloudflare Speedtest</span><span class="ld">Offizieller Geschwindigkeits-Test (Vergleich zu oben).</span></span><span class="ext">↗</span></a>
-      <a href="https://de.wikipedia.org/wiki/Internet" target="_blank" rel="noopener">
-        <span class="ic2">📖</span><span><span class="lt">Wikipedia: Internet</span><span class="ld">Der große Überblick — wie alles zusammenhängt.</span></span><span class="ext">↗</span></a>
-    </div>
-    <div class="card links">
-      <h2><span class="ic">📑</span> Quellen & Stand</h2>
-      <div class="sub">Woher die Zahlen oben stammen. Es sind gerundete Richtwerte — die echten Zahlen ändern sich laufend.</div>
-      <a href="https://www.submarinecablemap.com/" target="_blank" rel="noopener">
-        <span class="ic2">🌍</span><span><span class="lt">TeleGeography</span><span class="ld">Anzahl & Länge der Seekabel, Anlandungs-Stationen.</span></span><span class="ext">↗</span></a>
-      <a href="https://www.peeringdb.com/" target="_blank" rel="noopener">
-        <span class="ic2">🔌</span><span><span class="lt">PeeringDB</span><span class="ld">Zahl der Knotenpunkte (IXP) weltweit.</span></span><span class="ext">↗</span></a>
-      <a href="https://wondernetwork.com/pings" target="_blank" rel="noopener">
-        <span class="ic2">⏱️</span><span><span class="lt">WonderNetwork Pings</span><span class="ld">Typische Laufzeiten zwischen Städten.</span></span><span class="ext">↗</span></a>
-      <div class="note" style="margin-top:10px">Die Angabe „~95 % über Seekabel" ist ein in der Branche gängiger Richtwert (u. a. ITU). Stand der Seite: Juni 2026.</div>
-    </div>
-    <div class="card blue">
-      <h2><span class="ic">🏙️</span> Große Knotenpunkte</h2>
-      <div class="stat"><span class="k">🇩🇪 Frankfurt (DE-CIX)</span><span class="v">#1 Welt</span></div>
-      <div class="stat"><span class="k">🇸🇬 Singapur</span><span class="v">Asien-Tor</span></div>
-      <div class="stat"><span class="k">🇧🇷 Fortaleza</span><span class="v">Süd-Tor</span></div>
-      <div class="stat"><span class="k">🇺🇸 New York / Virginia</span><span class="v">Atlantik</span></div>
-      <div class="stat"><span class="k">🇦🇪 Dubai</span><span class="v">Nahost-Drehkreuz</span></div>
-      <a class="clink" href="https://www.de-cix.net/en/locations/frankfurt/statistics" target="_blank" rel="noopener">📈 DE-CIX Live-Verkehr ↗</a>
-      <a class="clink" href="https://de.wikipedia.org/wiki/Internet-Knoten" target="_blank" rel="noopener">📖 Internet-Knoten ↗</a>
-    </div>
-    <div class="card amber">
-      <h2><span class="ic">💡</span> Wusstest du?</h2>
-      <div class="stat"><span class="k">Tiefster Punkt eines Kabels</span><span class="v">~8.000<span class="u">m</span></span></div>
-      <div class="stat"><span class="k">Erstes Transatlantik-Kabel</span><span class="v">1858</span></div>
-      <div class="stat"><span class="k">Daten in einer Faser</span><span class="v">&gt;100<span class="u">Tbit/s</span></span></div>
-      <div class="stat"><span class="k">Reparatur-Spezialschiffe</span><span class="v">~60</span></div>
-      <div class="stat"><span class="k">Anteil per Satellit</span><span class="v">&lt;1<span class="u">%</span></span></div>
-      <div class="stat"><span class="k">Lebensdauer eines Kabels</span><span class="v">~25<span class="u">Jahre</span></span></div>
-    </div>
-</div><div data-ovgroup="system">    <div class="card blue">
-      <h2><span class="ic">🔌</span> Netzwerk-Details</h2>
-      <div class="sub"><b>Womit</b> du verbunden bist: ob du online bist, ob über <b>WLAN, Mobilfunk oder Kabel</b>, und welche Netz-Generation (z. B. 4G).</div>
-      <div class="stat"><span class="k">Status</span><span class="v" id="nOnline">—</span></div>
-      <div class="stat"><span class="k">Verbindungsart</span><span class="v" id="nType">—</span></div>
-      <div class="stat"><span class="k">Netz-Generation</span><span class="v" id="nGen">—</span></div>
-      <div class="stat"><span class="k">Datensparmodus</span><span class="v" id="nSave">—</span></div>
-      <div class="stat"><span class="k">Speicher (frei)</span><span class="v" id="nStore">—</span></div>
-      <div class="note">„Verbindungsart" (WLAN / Mobil / Kabel) zeigen nur manche Browser — Chrome am ehesten.</div>
-    </div>
-    <div class="card">
-      <h2><span class="ic">🖥️</span> Dein Gerät & Treiber</h2>
-      <div class="sub">Auf <b>welchem Gerät</b> du gerade surfst: Betriebssystem, Browser und die Hardware (Prozessor, Grafik-Treiber, Bildschirm).</div>
-      <div class="stat"><span class="k">Betriebssystem</span><span class="v" id="dOS">—</span></div>
-      <div class="stat"><span class="k">Browser</span><span class="v" id="dBrowser">—</span></div>
-      <div class="stat"><span class="k">Prozessor-Kerne</span><span class="v" id="dCores">—</span></div>
-      <div class="stat"><span class="k">Arbeitsspeicher</span><span class="v" id="dRam">—</span></div>
-      <div class="stat"><span class="k">Grafik / Treiber</span><span class="v" id="dGpu" style="font-size:11.5px; text-align:right; max-width:175px">—</span></div>
-      <div class="stat"><span class="k">Bildschirm</span><span class="v" id="dScreen">—</span></div>
-      <div class="stat"><span class="k">Zeitzone</span><span class="v" id="dTz" style="font-size:12px">—</span></div>
-      <div class="stat"><span class="k">Sprache</span><span class="v" id="dLang">—</span></div>
-      <div class="note">Direkt vom Browser ausgelesen. Der echte Netzwerk-Treiber-Name ist aus Sicherheitsgründen nicht abrufbar — die Grafik-Karte/Treiber schon.</div>
-    </div>
-    <div class="card amber">
-      <h2><span class="ic">📊</span> Sitzungs-Aktivität</h2>
-      <div class="sub">Was auf <b>dieser Seite</b> läuft, seit du sie geöffnet hast: gezeigte Routen, veranschaulichte Datenpakete und die Laufzeit der Ansicht.</div>
-      <div class="stat"><span class="k">Aktive Haupt-Routen</span><span class="v big" id="aRoutes">23</span></div>
-      <div class="stat"><span class="k">Datenpakete (simuliert)</span><span class="v" id="aPackets">0</span></div>
-      <div class="stat"><span class="k">Laufzeit dieser Ansicht</span><span class="v" id="aUptime">00:00</span></div>
-      <div class="note">Die Paket-Zählung veranschaulicht den Datenfluss — die Routen und Knotenpunkte sind real.</div>
-    </div>
-</div></div>
 </body>
 </html>
