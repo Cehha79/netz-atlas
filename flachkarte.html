@@ -47,6 +47,18 @@
   .legend i{display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; vertical-align:1px}
   .hint{position:absolute; right:22px; bottom:16px; color:var(--dim); font-size:11px; pointer-events:none}
 
+  .layers{position:absolute; top:14px; left:50%; transform:translateX(-50%);
+    display:flex; gap:8px; flex-wrap:wrap; justify-content:center; z-index:6}
+  .layers .chip{display:inline-flex; align-items:center; gap:7px; cursor:pointer; user-select:none;
+    padding:6px 13px; border-radius:999px; font-size:12.5px; font-weight:600;
+    background:rgba(11,18,34,.85); border:1px solid var(--border); color:var(--muted);
+    backdrop-filter:blur(6px); transition:.15s}
+  .layers .chip .dt{width:9px; height:9px; border-radius:50%; background:currentColor; opacity:.35}
+  .layers .chip:hover{border-color:#2f4a80; color:var(--text)}
+  .layers .chip.on{color:var(--text); background:rgba(18,32,60,.92); border-color:#3a5da0}
+  .layers .chip.on .dt{opacity:1; box-shadow:0 0 8px currentColor}
+  .layers .chip.eq.on{color:#ff9a86} .layers .chip.out.on{color:#ffd24a} .layers .chip.bgp.on{color:#7fd0ff}
+
   .ginfo{position:absolute; right:22px; top:60px; width:260px;
     background:rgba(9,16,30,.94); border:1px solid #2a4684; border-radius:12px;
     padding:14px 15px; backdrop-filter:blur(6px); box-shadow:0 14px 34px rgba(0,0,0,.5);
@@ -80,12 +92,18 @@
   .sitefoot .fact.donate{background:linear-gradient(170deg,#f59e0b,#c2410c)}
   .sitefoot .fact:hover{filter:brightness(1.1)}
 
+  @media(max-width:820px){
+    .hud-title span{display:none}
+    .layers{top:44px}
+    .layers .chip{padding:5px 10px; font-size:11.5px}
+  }
   @media(max-width:640px){
     .hud-title,.legend,.hint{left:12px;right:12px}
-    .legend{gap:10px 14px; bottom:10px}
+    .legend{gap:9px 13px; bottom:10px; font-size:10.5px}
     .ginfo{right:12px; left:12px; width:auto}
     .topbar{padding:10px 12px}
     .status .lbl{display:none}
+    .hint{display:none}
   }
 </style>
 </head>
@@ -102,7 +120,8 @@
     <div><h1>Netz-Atlas · Flache Karte</h1><small>Das Seekabel-Netz und die Erde in Echtzeit</small></div>
   </div>
   <div class="status">
-    <div class="item"><span class="led red" id="eqled"></span><span class="lbl">Live-Erdbeben (24 h)</span> <b id="eqcount">—</b></div>
+    <div class="item"><span class="led red" id="eqled"></span><span class="lbl">Erdbeben 24 h</span> <b id="eqcount">—</b></div>
+    <div class="item" id="bgpstat" style="display:none"><span class="led" style="background:#7fd0ff;box-shadow:0 0 8px #7fd0ff"></span><span class="lbl">BGP</span> <b id="bgpcount">0</b></div>
     <div class="item">Ortszeit <b id="clock">—</b></div>
   </div>
 </div>
@@ -110,14 +129,23 @@
 <div class="stage">
   <canvas id="map"></canvas>
   <div class="loading" id="loading">Karte wird geladen …</div>
-  <div class="hud-title"><b>WELTKARTE · SEEKABEL &amp; LIVE-ERDBEBEN</b><span>Klick auf einen Knoten oder ein Erdbeben → Details</span></div>
+  <div class="hud-title"><b>WELTKARTE · SEEKABEL &amp; LIVE-DATEN</b><span>Ebenen oben zu-/abschalten · Punkte anklicken → Details</span></div>
+
+  <div class="layers">
+    <span class="chip eq on"  id="chip-eq"  onclick="toggleLayer('eq')"><span class="dt"></span>🌋 Erdbeben</span>
+    <span class="chip out on" id="chip-out" onclick="toggleLayer('out')"><span class="dt"></span>🔌 Ausfälle</span>
+    <span class="chip bgp"    id="chip-bgp" onclick="toggleLayer('bgp')"><span class="dt"></span>📡 BGP-Live</span>
+  </div>
+
   <div class="legend">
-    <span><i style="background:#ffce6a"></i>Knotenpunkt (Stadt)</span>
+    <span><i style="background:#ffce6a"></i>Knotenpunkt</span>
     <span><i style="background:#45e0c2"></i>Daten-Fluss</span>
     <span><i style="background:#5a9bff"></i>Landmasse</span>
-    <span><i style="background:#ff6b81"></i>Live-Erdbeben (USGS)</span>
+    <span><i style="background:#ff6b81"></i>Erdbeben (USGS)</span>
+    <span><i style="background:#ffd24a"></i>Ausfall (IODA)</span>
+    <span><i style="background:#7fd0ff"></i>BGP-Kollektor (RIPE)</span>
   </div>
-  <div class="hint">💡 Erdbeben können Seekabel beschädigen · Daten: USGS, letzte 24 h</div>
+  <div class="hint">💡 Live-Quellen: USGS (Erdbeben) · IODA (Ausfälle) · RIPE RIS (BGP)</div>
 
   <div class="ginfo" id="ginfo">
     <span class="gx" onclick="closeGinfo()">✕</span>
@@ -271,6 +299,94 @@ function loadQuakes(){
 }
 function eqColor(m){ return m>=6?[255,70,90] : m>=4.5?[255,120,80] : m>=3?[255,180,90] : [255,220,120]; }
 
+/* ---------- Ebenen-Umschalter ---------- */
+const layers={eq:true, out:true, bgp:false};
+function toggleLayer(id){
+  layers[id]=!layers[id];
+  document.getElementById("chip-"+id).classList.toggle("on",layers[id]);
+  if(id==="bgp"){ layers.bgp ? openBGP() : closeBGP(); }
+}
+let animTime=0;
+
+/* ---------- Länder-Zentroide aus GeoJSON (für IODA-Marker) ---------- */
+let CENTR_ISO={}, CENTR_NAME={};
+function buildCentroids(geo){
+  for(const f of geo.features){
+    const gm=f.geometry, pr=f.properties||{}; if(!gm) continue;
+    const groups = gm.type==="Polygon"?[gm.coordinates] : gm.type==="MultiPolygon"?gm.coordinates : [];
+    let best=null,bestA=-1;
+    for(const poly of groups){
+      const r=poly[0]; if(!r||r.length<4) continue;
+      let minx=180,miny=90,maxx=-180,maxy=-90;
+      for(const p of r){ if(p[0]<minx)minx=p[0]; if(p[0]>maxx)maxx=p[0]; if(p[1]<miny)miny=p[1]; if(p[1]>maxy)maxy=p[1]; }
+      const a=(maxx-minx)*(maxy-miny); if(a>bestA){bestA=a; best=r;}
+    }
+    if(!best) continue;
+    let sx=0,sy=0; for(const p of best){ sx+=p[0]; sy+=p[1]; }
+    const c=[sx/best.length, sy/best.length];
+    const iso=pr.ISO_A2, nm=(pr.NAME||pr.ADMIN||"").toLowerCase();
+    if(iso && iso!=="-99") CENTR_ISO[iso]=c;
+    if(nm) CENTR_NAME[nm]=c;
+  }
+}
+
+/* ---------- IODA — Länder-Ausfälle (letzte 24 h) ---------- */
+let OUTAGES=[];
+function loadOutages(){
+  const now=Math.floor(Date.now()/1000), from=now-86400;
+  const url=`https://api.ioda.inetintel.cc.gatech.edu/v2/outages/summary?from=${from}&until=${now}&entityType=country&limit=60`;
+  fetch(url).then(r=>r.json()).then(j=>{
+    const out=[];
+    for(const x of (j.data||[])){
+      const e=x.entity||{}; const code=(e.code||"").toUpperCase(); const nm=(e.name||"").toLowerCase();
+      const c = CENTR_ISO[code] || CENTR_NAME[nm];
+      if(!c) continue;
+      const score=(x.scores&&(x.scores.overall!=null?x.scores.overall:x.scores["ping-slash24.median"]))||0;
+      out.push({lng:c[0], lat:c[1], name:e.name||code, code:code, score:score});
+    }
+    OUTAGES=out;
+  }).catch(()=>{});
+}
+
+/* ---------- RIPE RIS — BGP-Kollektoren (echte Standorte) ---------- */
+const RRC={
+  rrc00:[52.37,4.90,"Amsterdam"], rrc01:[51.51,-0.13,"London"], rrc02:[48.86,2.35,"Paris"],
+  rrc03:[52.37,4.90,"Amsterdam"], rrc04:[46.20,6.14,"Genf"], rrc05:[48.21,16.37,"Wien"],
+  rrc06:[35.68,139.77,"Tokio"], rrc07:[59.33,18.07,"Stockholm"], rrc08:[37.34,-121.89,"San Jose"],
+  rrc09:[47.38,8.54,"Zürich"], rrc10:[45.46,9.19,"Mailand"], rrc11:[40.71,-74.01,"New York"],
+  rrc12:[50.11,8.68,"Frankfurt"], rrc13:[55.75,37.62,"Moskau"], rrc14:[37.44,-122.14,"Palo Alto"],
+  rrc15:[-23.55,-46.63,"São Paulo"], rrc16:[25.76,-80.19,"Miami"], rrc18:[41.39,2.17,"Barcelona"],
+  rrc19:[-26.20,28.05,"Johannesburg"], rrc20:[47.38,8.54,"Zürich"], rrc21:[48.86,2.35,"Paris"],
+  rrc22:[44.43,26.10,"Bukarest"], rrc23:[1.35,103.82,"Singapur"], rrc24:[-34.90,-56.19,"Montevideo"],
+  rrc25:[52.37,4.90,"Amsterdam"], rrc26:[25.20,55.27,"Dubai"]
+};
+let bgpFlash={};      // rrcId -> {t, kind:'a'|'w'}
+let bgpTotal={};      // rrcId -> Zähler
+let bgpCount=0, bgpWS=null;
+function openBGP(){
+  document.getElementById("bgpstat").style.display="";
+  try{
+    bgpWS=new WebSocket("wss://ris-live.ripe.net/v1/ws/?client=netzatlas");
+    bgpWS.onopen=()=>{ bgpWS.send(JSON.stringify({type:"ris_subscribe", data:{socketOptions:{includeRaw:false}}})); };
+    bgpWS.onmessage=ev=>{
+      let m; try{ m=JSON.parse(ev.data); }catch(e){ return; }
+      if(!m||m.type!=="ris_message"||!m.data) return;
+      const d=m.data, host=(d.host||"").split(".")[0];
+      if(!RRC[host]) return;
+      const kind=(d.withdrawals&&d.withdrawals.length)?"w":"a";
+      bgpFlash[host]={t:animTime, kind:kind};
+      bgpTotal[host]=(bgpTotal[host]||0)+1;
+      bgpCount++;
+    };
+    bgpWS.onerror=()=>{};
+  }catch(e){ document.getElementById("bgpcount").textContent="offline"; }
+}
+function closeBGP(){
+  document.getElementById("bgpstat").style.display="none";
+  if(bgpWS){ try{ bgpWS.close(); }catch(e){} bgpWS=null; }
+  bgpFlash={};
+}
+
 /* ---------- Bogen-Geometrie (Bildschirm-Quadratbezier) ---------- */
 function arcPoints(ax,ay,bx,by){
   const mx=(ax+bx)/2,my=(ay+by)/2,dx=bx-ax,dy=by-ay,len=Math.hypot(dx,dy)||1;
@@ -287,7 +403,7 @@ const prevHead=new Array(LINKS.length).fill(0);
 /* ---------- Animation ---------- */
 let t0=null;
 function frame(ts){
-  if(t0===null)t0=ts; const time=(ts-t0)/1000;
+  if(t0===null)t0=ts; const time=(ts-t0)/1000; animTime=time;
   ctx.clearRect(0,0,W,H);
   if(bg) ctx.drawImage(bg,0,0,W,H);
 
@@ -332,8 +448,24 @@ function frame(ts){
   }
   ctx.globalAlpha=1;
 
+  // Ausfall-Länder (IODA)
+  if(layers.out){
+    for(let i=0;i<OUTAGES.length;i++){
+      const o=OUTAGES[i], x=px(o.lng), y=py(o.lat);
+      const ph=(time*1.0 + i*0.5)%1, r=9+ph*16;
+      ctx.globalAlpha=(1-ph)*0.6; ctx.lineWidth=2; ctx.strokeStyle="#ffd24a";
+      ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.stroke();
+      ctx.globalAlpha=0.95; ctx.fillStyle="#ffd24a"; ctx.shadowColor="#ffb400"; ctx.shadowBlur=10;
+      ctx.beginPath(); ctx.arc(x,y,4,0,7); ctx.fill(); ctx.shadowBlur=0;
+      // kleines Warn-Symbol
+      ctx.globalAlpha=1; ctx.fillStyle="#3a2600"; ctx.font="bold 7px system-ui"; ctx.textAlign="center";
+      ctx.fillText("!", x, y+0.5);
+    }
+    ctx.globalAlpha=1; ctx.textBaseline="middle";
+  }
+
   // Live-Erdbeben (pulsierend)
-  for(let i=0;i<QUAKES.length;i++){
+  if(layers.eq) for(let i=0;i<QUAKES.length;i++){
     const q=QUAKES[i], x=px(q.lng), y=py(q.lat);
     const col=eqColor(q.mag), base=Math.max(2.2, (q.mag-1)*1.7);
     const ph=(time*1.3 + i*0.7)%1;
@@ -347,6 +479,27 @@ function frame(ts){
     ctx.beginPath(); ctx.arc(x,y,base*0.55,0,7); ctx.fill(); ctx.shadowBlur=0;
   }
   ctx.globalAlpha=1;
+
+  // BGP-Kollektoren (RIPE RIS, live)
+  if(layers.bgp){
+    for(const id in RRC){
+      const rr=RRC[id], x=px(rr[1]), y=py(rr[0]);
+      const fl=bgpFlash[id]; const active=fl && (time-fl.t)<1.2;
+      // Grundpunkt
+      ctx.globalAlpha=active?1:0.4; ctx.fillStyle="#7fd0ff";
+      ctx.beginPath(); ctx.arc(x,y,2.4,0,7); ctx.fill();
+      if(active){
+        const age=(time-fl.t)/1.2, wdl=fl.kind==="w";
+        const col=wdl?"#ffce6a":"#7fd0ff";
+        ctx.globalAlpha=(1-age)*0.85; ctx.lineWidth=1.6; ctx.strokeStyle=col;
+        ctx.beginPath(); ctx.arc(x,y,3+age*15,0,7); ctx.stroke();
+        ctx.globalAlpha=1; ctx.fillStyle=col; ctx.shadowColor=col; ctx.shadowBlur=9;
+        ctx.beginPath(); ctx.arc(x,y,2.6,0,7); ctx.fill(); ctx.shadowBlur=0;
+      }
+    }
+    ctx.globalAlpha=1;
+    const el=document.getElementById("bgpcount"); if(el) el.textContent=bgpCount.toLocaleString("de-DE");
+  }
 
   // Knotenpunkte + Namen
   ctx.font=`600 ${Math.max(10,W/110)}px system-ui,sans-serif`; ctx.textBaseline="middle";
@@ -374,16 +527,30 @@ const gi=document.getElementById("ginfo"), giB=document.getElementById("ginfo-bo
 function closeGinfo(){ gi.classList.remove("on"); }
 cv.addEventListener("click",e=>{
   const r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
-  // 1) Erdbeben zuerst (liegen oft dicht)
-  let bestQ=null,bd=16*16;
-  for(const q of QUAKES){ const dx=px(q.lng)-mx, dy=py(q.lat)-my, d=dx*dx+dy*dy; if(d<bd){bd=d;bestQ=q;} }
-  // 2) Knotenpunkte
-  let bestH=null,bh=18*18,bhId=null;
-  for(const k in HUBS){ const h=HUBS[k], dx=px(h[1])-mx, dy=py(h[0])-my, d=dx*dx+dy*dy; if(d<bh){bh=d;bestH=h;bhId=k;} }
-  if(bestH && (!bestQ || bh<=bd)){ showHub(bhId,bestH); return; }
-  if(bestQ){ showQuake(bestQ); return; }
-  closeGinfo();
+  const R=18*18; let best=null, bestD=R;
+  function test(x,y,fn){ const dx=x-mx, dy=y-my, d=dx*dx+dy*dy; if(d<bestD){ bestD=d; best=fn; } }
+  for(const k in HUBS){ const h=HUBS[k]; test(px(h[1]),py(h[0]), ()=>showHub(k,h)); }
+  if(layers.eq)  for(const q of QUAKES){ test(px(q.lng),py(q.lat), ()=>showQuake(q)); }
+  if(layers.out) for(const o of OUTAGES){ test(px(o.lng),py(o.lat), ()=>showOutage(o)); }
+  if(layers.bgp) for(const id in RRC){ const rr=RRC[id]; test(px(rr[1]),py(rr[0]), ()=>showRRC(id,rr)); }
+  if(best){ best(); } else { closeGinfo(); }
 });
+function showOutage(o){
+  giB.innerHTML=
+    `<h3>⚠ ${o.name}</h3><div class="gsub">Netz-Auffälligkeit (IODA)</div>`+
+    `<div class="grow"><span class="k">Land-Code</span><span class="v">${o.code||"—"}</span></div>`+
+    `<div class="grow"><span class="k">Ausfall-Score</span><span class="v">${Math.round(o.score).toLocaleString("de-DE")}</span></div>`+
+    `<div class="gnote">IODA erkennt landesweite Netz-Störungen (letzte 24 h) aus Mess-Signalen. Höherer Score = stärker betroffen.</div>`;
+  gi.classList.add("on");
+}
+function showRRC(id,rr){
+  giB.innerHTML=
+    `<h3>${id.toUpperCase()} · ${rr[2]}</h3><div class="gsub">RIPE-RIS-Kollektor (BGP)</div>`+
+    `<div class="grow"><span class="k">Standort</span><span class="v">${rr[2]}</span></div>`+
+    `<div class="grow"><span class="k">BGP-Updates</span><span class="v">${(bgpTotal[id]||0).toLocaleString("de-DE")}</span></div>`+
+    `<div class="gnote">Sammelt live die Routing-Ankündigungen des Internets. Blau = neue Route, gelb = Route zurückgezogen.</div>`;
+  gi.classList.add("on");
+}
 function showHub(id,h){
   const cnt=LINKS.filter(l=>l[0]===id||l[1]===id).length;
   giB.innerHTML=
@@ -409,10 +576,12 @@ function showQuake(q){
 resize();
 fetch("data/countries-110m.geojson").then(r=>r.json()).then(geo=>{
   LAND=buildLandFrom(geo);
+  buildCentroids(geo);
   buildBg();
   document.getElementById("loading").classList.add("off");
+  loadOutages(); setInterval(loadOutages, 300000); // Ausfälle alle 5 Minuten
 }).catch(()=>{ document.getElementById("loading").textContent="Karte konnte nicht geladen werden."; });
-loadQuakes(); setInterval(loadQuakes, 180000); // alle 3 Minuten aktualisieren
+loadQuakes(); setInterval(loadQuakes, 180000); // Erdbeben alle 3 Minuten
 requestAnimationFrame(frame);
 </script>
 </body>
