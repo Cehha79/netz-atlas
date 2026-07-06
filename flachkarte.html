@@ -3,94 +3,157 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flache Weltkarte — Das Internet als leuchtendes Netz</title>
+<title>Netz-Atlas — Flache Karte</title>
 <style>
-  :root{ --text:#eaf0ff; --muted:#94a3c8; --cy:#46e0c0; --gold:#ffcf66; }
-  *{box-sizing:border-box}
-  html,body{margin:0; background:#03060f; color:var(--text);
-    font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
-  header{text-align:center; padding:26px 20px 10px}
-  header h1{margin:0 0 6px; font-size:clamp(22px,3.4vw,36px);
-    background:linear-gradient(90deg,#7fe9ff,#9affd1); -webkit-background-clip:text; background-clip:text; color:transparent}
-  header p{margin:0 auto; color:var(--muted); max-width:680px; font-size:15px}
+  :root{
+    --bg:#050912; --panel:#0b1120; --panel2:#0e1730; --border:#1b2742;
+    --text:#e6ecfb; --muted:#8a98be; --dim:#586588;
+    --teal:#45e0c2; --amber:#ffce6a; --blue:#5a9bff; --red:#ff6b81;
+    --mono:ui-monospace,SFMono-Regular,Menlo,"Cascadia Code",monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  html{-webkit-text-size-adjust:100%; text-size-adjust:100%}
+  html,body{height:100%; background:var(--bg); color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; -webkit-font-smoothing:antialiased; overflow:hidden}
+  body{display:flex; flex-direction:column}
 
-  .stage{position:relative; width:100%; margin:0 auto;}
-  canvas{display:block; width:100%; height:auto}
+  #atlasnav{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;background:#070d18;border-bottom:1px solid var(--border);font-size:13px;z-index:10}
+  #atlasnav a{color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30}
+  #atlasnav a.active{background:linear-gradient(170deg,#173a6b,#0d2145);color:#fff}
+  #atlasnav a:hover{background:#16233d}
 
-  .legend{display:flex; flex-wrap:wrap; gap:22px; justify-content:center;
-    color:var(--muted); font-size:14px; margin:14px auto; padding:0 18px}
-  .legend span{display:inline-flex; align-items:center; gap:8px}
-  .d{width:12px;height:12px;border-radius:50%}
-  .d.g{background:var(--gold); box-shadow:0 0 8px var(--gold)}
-  .d.c{background:var(--cy); box-shadow:0 0 8px var(--cy)}
-  .d.l{width:18px;height:10px;border-radius:3px;background:#2b6bd6;opacity:.7}
-  footer{text-align:center; color:var(--muted); font-size:13px; padding:14px 20px 34px}
+  .topbar{display:flex; align-items:center; justify-content:space-between; gap:16px;
+    padding:14px 22px; border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,#0a1224,#070c18); z-index:10}
+  .brand{display:flex; align-items:center; gap:14px}
+  .brand .mark{width:38px; height:38px; border-radius:10px; display:grid; place-items:center;
+    background:radial-gradient(circle at 35% 30%,#1b3a6b,#0a1730); border:1px solid #24407a; font-size:20px}
+  .brand h1{font-size:19px; font-weight:700; letter-spacing:.2px}
+  .brand small{display:block; color:var(--muted); font-size:12px; font-weight:500}
+  .status{display:flex; align-items:center; gap:18px; font-size:12.5px; color:var(--muted)}
+  .status .item{display:flex; align-items:center; gap:7px}
+  .led{width:9px; height:9px; border-radius:50%; background:var(--teal); box-shadow:0 0 8px var(--teal)}
+  .led.red{background:var(--red); box-shadow:0 0 8px var(--red)}
+  .status b{color:var(--text); font-family:var(--mono)}
+
+  .stage{position:relative; flex:1; min-height:0; overflow:hidden; background:#040810}
+  #map{position:absolute; inset:0; width:100%; height:100%; display:block; cursor:crosshair}
+
+  .hud-title{position:absolute; left:22px; top:16px; pointer-events:none}
+  .hud-title b{font-size:14px; letter-spacing:.4px}
+  .hud-title span{display:block; color:var(--muted); font-size:11.5px; margin-top:2px}
+  .legend{position:absolute; left:22px; bottom:16px; display:flex; gap:16px; flex-wrap:wrap;
+    color:var(--muted); font-size:11.5px; pointer-events:none}
+  .legend i{display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; vertical-align:1px}
+  .hint{position:absolute; right:22px; bottom:16px; color:var(--dim); font-size:11px; pointer-events:none}
+
+  .ginfo{position:absolute; right:22px; top:60px; width:260px;
+    background:rgba(9,16,30,.94); border:1px solid #2a4684; border-radius:12px;
+    padding:14px 15px; backdrop-filter:blur(6px); box-shadow:0 14px 34px rgba(0,0,0,.5);
+    opacity:0; transform:translateY(-6px); transition:opacity .18s, transform .18s; pointer-events:none}
+  .ginfo.on{opacity:1; transform:none; pointer-events:auto}
+  .ginfo .gx{position:absolute; top:9px; right:10px; cursor:pointer; color:var(--dim); font-size:16px; line-height:1}
+  .ginfo .gx:hover{color:var(--text)}
+  .ginfo h3{font-size:15px; color:#ffe3a8; margin:0 0 3px; padding-right:18px}
+  .ginfo .gsub{color:var(--muted); font-size:11.5px; margin-bottom:10px}
+  .ginfo .grow{display:flex; justify-content:space-between; gap:10px; padding:5px 0; border-bottom:1px dashed #16203a; font-size:12.5px}
+  .ginfo .grow:last-of-type{border-bottom:0}
+  .ginfo .grow .k{color:var(--muted)} .ginfo .grow .v{font-family:var(--mono); color:var(--text)}
+  .ginfo .gnote{color:var(--dim); font-size:11px; margin-top:9px; line-height:1.5}
+
+  .loading{position:absolute; inset:0; display:grid; place-items:center; color:var(--muted); font-size:13px; z-index:5}
+  .loading.off{display:none}
+
+  .sitefoot{border-top:1px solid var(--border); background:#070d18; padding:9px 20px;
+    display:flex; gap:12px 18px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+    color:var(--muted); font-size:13px; z-index:10}
+  .sitefoot .fbrand{color:var(--muted); text-decoration:none; display:inline-flex; align-items:center; gap:7px}
+  .sitefoot .fbrand .by{font-style:italic; font-size:12px}
+  .sitefoot .fbrand b{color:var(--teal); font-weight:700}
+  .sitefoot .fbrand .url{font-family:var(--mono); font-size:12px; color:var(--muted)}
+  .sitefoot .fbrand:hover b,.sitefoot .fbrand:hover .url{color:#7ff0d8}
+  .sitefoot .flinks{display:inline-flex; align-items:center; gap:14px; flex-wrap:wrap}
+  .sitefoot .flinks a{color:var(--muted); text-decoration:none; font-weight:500}
+  .sitefoot .flinks a:hover{color:var(--teal)}
+  .sitefoot .dot{color:var(--dim)}
+  .sitefoot .fact{display:inline-flex; align-items:center; gap:6px; color:#fff; font-weight:650; padding:5px 13px; border-radius:999px; text-decoration:none; background:linear-gradient(170deg,#5a9bff,#2f5fd0)}
+  .sitefoot .fact.donate{background:linear-gradient(170deg,#f59e0b,#c2410c)}
+  .sitefoot .fact:hover{filter:brightness(1.1)}
+
+  @media(max-width:640px){
+    .hud-title,.legend,.hint{left:12px;right:12px}
+    .legend{gap:10px 14px; bottom:10px}
+    .ginfo{right:12px; left:12px; width:auto}
+    .topbar{padding:10px 12px}
+    .status .lbl{display:none}
+  }
 </style>
 </head>
 <body>
-<nav id="atlasnav" style="position:sticky;top:0;z-index:99999;display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;background:#070d18;border-bottom:1px solid #1b2742;font-family:system-ui,-apple-system,sans-serif;font-size:13px"><a href="index.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">📊 Übersicht</a><a href="globus.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">🌍 Globus</a><a href="flachkarte.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">🛰️ Flache Karte</a></nav>
+<nav id="atlasnav">
+  <a href="index.html">📊 Übersicht</a>
+  <a href="globus.html">🌍 Globus</a>
+  <a href="flachkarte.html" class="active">🛰️ Flache Karte</a>
+</nav>
 
-
-<header>
-  <h1>🗺️ Das Internet auf der flachen Weltkarte</h1>
-  <p>Große Karte: die leuchtenden Bögen sind die Haupt-Leitungen zwischen den Knotenpunkten, die wandernden Lichter sind die fließenden Daten.</p>
-</header>
-
-<div class="stage"><canvas id="map"></canvas></div>
-
-<div class="legend">
-  <span><i class="d g"></i> Knotenpunkt (Stadt mit Rechenzentren)</span>
-  <span><i class="d c"></i> wandernde Daten</span>
-  <span><i class="d l"></i> Landmasse (aus Lichtpunkten)</span>
+<div class="topbar">
+  <div class="brand">
+    <div class="mark">🛰️</div>
+    <div><h1>Netz-Atlas · Flache Karte</h1><small>Das Seekabel-Netz und die Erde in Echtzeit</small></div>
+  </div>
+  <div class="status">
+    <div class="item"><span class="led red" id="eqled"></span><span class="lbl">Live-Erdbeben (24 h)</span> <b id="eqcount">—</b></div>
+    <div class="item">Ortszeit <b id="clock">—</b></div>
+  </div>
 </div>
 
-<footer>Große flache Weltkarte · reines Canvas, läuft offline · für Hasan</footer>
+<div class="stage">
+  <canvas id="map"></canvas>
+  <div class="loading" id="loading">Karte wird geladen …</div>
+  <div class="hud-title"><b>WELTKARTE · SEEKABEL &amp; LIVE-ERDBEBEN</b><span>Klick auf einen Knoten oder ein Erdbeben → Details</span></div>
+  <div class="legend">
+    <span><i style="background:#ffce6a"></i>Knotenpunkt (Stadt)</span>
+    <span><i style="background:#45e0c2"></i>Daten-Fluss</span>
+    <span><i style="background:#5a9bff"></i>Landmasse</span>
+    <span><i style="background:#ff6b81"></i>Live-Erdbeben (USGS)</span>
+  </div>
+  <div class="hint">💡 Erdbeben können Seekabel beschädigen · Daten: USGS, letzte 24 h</div>
+
+  <div class="ginfo" id="ginfo">
+    <span class="gx" onclick="closeGinfo()">✕</span>
+    <div id="ginfo-body"></div>
+  </div>
+</div>
+
+<footer class="sitefoot">
+  <a class="fbrand" href="https://www.mika-tec.com" target="_blank" rel="noopener"><span class="by">by</span> <b>Mika-Tec</b> <span class="dot">·</span> <span class="url">www.mika-tec.com</span></a>
+  <nav class="flinks">
+    <a href="https://mika-tec.com/impressum.html" target="_blank" rel="noopener">Impressum</a>
+    <a href="https://mika-tec.com/datenschutz.html" target="_blank" rel="noopener">Datenschutz</a>
+    <a href="https://mika-tec.com/kontakt.html" target="_blank" rel="noopener">Kontakt</a>
+    <span class="dot">·</span>
+    <a class="fact" href="mailto:cehha79@gmail.com?subject=Feedback%20zu%20Netz-Atlas">💬 Feedback</a>
+    <a class="fact donate" href="https://paypal.me/mikatec" target="_blank" rel="noopener">♥ Spenden</a>
+  </nav>
+</footer>
 
 <script>
-const cv=document.getElementById("map"), ctx=cv.getContext("2d");
-const stage=cv.parentElement;
-let W,H,DPR;
-function resize(){
-  DPR=Math.min(window.devicePixelRatio||1,2);
-  W=stage.clientWidth; H=Math.round(W/2);
-  cv.width=W*DPR; cv.height=H*DPR;
-  cv.style.height=H+"px";
-  ctx.setTransform(DPR,0,0,DPR,0,0);
-}
-window.addEventListener("resize",resize); resize();
+/* ---------- Uhr ---------- */
+function tick(){const d=new Date();document.getElementById("clock").textContent=
+  String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+":"+String(d.getSeconds()).padStart(2,"0");}
+setInterval(tick,1000); tick();
 
-// Umrechnung Längen-/Breitengrad -> Bildschirm (äquirektangular)
-function px(lon){return (lon+180)/360*W;}
-function py(lat){return (90-lat)/180*H;}
-
-// ---- Kontinente (schematisch, Basis 1000x500) ----
-const POLYS=[
- [[33,69],[69,53],[144,56],[236,50],[272,47],[283,61],[322,83],[344,106],[317,125],[306,133],[275,181],[256,167],[231,178],[208,189],[194,167],[175,158],[156,139],[153,117],[125,89],[83,86],[42,83]],
- [[375,83],[417,56],[444,39],[417,22],[361,28],[339,39],[361,61]],
- [[278,228],[283,250],[278,264],[292,292],[306,306],[303,333],[297,361],[317,403],[319,389],[339,361],[367,319],[389,311],[403,272],[378,256],[361,250],[356,236],[333,222],[283,219]],
- [[453,192],[453,208],[472,236],[522,239],[528,256],[536,278],[533,300],[542,328],[556,347],[578,342],[592,319],[611,292],[617,256],[642,217],[622,217],[619,208],[603,189],[592,164],[569,161],[531,156],[508,147],[483,150],[472,167],[458,183]],
- [[472,144],[475,131],[486,117],[494,114],[506,108],[522,100],[533,97],[556,97],[583,83],[578,61],[542,61],[514,78],[528,89],[508,100],[494,111],[486,128],[475,139]],
- [[578,61],[583,83],[611,125],[597,147],[625,139],[639,167],[633,181],[656,181],[667,189],[686,183],[700,192],[711,228],[722,228],[722,208],[744,192],[756,192],[772,228],[789,247],[792,222],[803,208],[800,192],[819,186],[839,167],[839,139],[853,144],[861,131],[875,97],[897,86],[944,81],[972,67],[1000,61],[1000,50],[889,47],[778,33],[667,56],[611,61],[583,69]],
- [[817,311],[839,300],[861,283],[881,283],[894,281],[906,300],[917,319],[925,339],[917,356],[897,358],[875,347],[858,339],[842,344],[819,344],[817,328]]
-];
-function inPoly(x,y,p){let c=false;for(let i=0,j=p.length-1;i<p.length;j=i++){const xi=p[i][0],yi=p[i][1],xj=p[j][0],yj=p[j][1];if(((yi>y)!=(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c;}return c;}
-// Land-Lichtpunkte (in Basis-Koordinaten gespeichert, beim Zeichnen skaliert)
-const DOTS=[];
-for(let by=8; by<500; by+=5){
-  for(let bx=0; bx<1000; bx+=5){
-    for(const p of POLYS){ if(inPoly(bx,by,p)){ DOTS.push([bx,by]); break; } }
-  }
-}
-
-// ---- Knotenpunkte (echte Städte) ----
+/* ---------- Knotenpunkte & Leitungen (wie Globus) ---------- */
 const HUBS={
-  newyork:[40.7,-74,"New York","end",-8,-8], losangeles:[34,-118.2,"Los Angeles","end",-8,16], miami:[25.8,-80.2,"Miami","end",-8,15],
-  fortaleza:[-3.7,-38.5,"Fortaleza","start",6,16], saopaulo:[-23.5,-46.6,"São Paulo","end",-8,16],
-  london:[51.5,-0.1,"London","end",-8,-8], lisbon:[38.7,-9.1,"Lissabon","end",-8,15], frankfurt:[50.1,8.7,"Frankfurt","start",8,-7],
-  marseille:[43.3,5.4,"Marseille","start",8,15], lagos:[6.5,3.4,"Lagos","end",-8,15], capetown:[-33.9,18.4,"Kapstadt","start",8,15],
-  mombasa:[-4,39.6,"Mombasa","start",8,4], dubai:[25.2,55.3,"Dubai","start",8,-5], mumbai:[19,72.8,"Mumbai","start",8,15],
-  singapore:[1.35,103.8,"Singapur","start",8,15], hongkong:[22.3,114.2,"Hongkong","start",8,-5], tokyo:[35.7,139.7,"Tokio","start",10,-5],
-  sydney:[-33.9,151.2,"Sydney","start",8,15]
+  newyork:[40.7,-74,"New York","Atlantik-Tor Nordamerika"], losangeles:[34,-118.2,"Los Angeles","Pazifik-Tor Westküste"],
+  miami:[25.8,-80.2,"Miami","Drehkreuz Lateinamerika"], fortaleza:[-3.7,-38.5,"Fortaleza","Süd-Atlantik-Landepunkt"],
+  saopaulo:[-23.5,-46.6,"São Paulo","Südamerika-Metropole"], london:[51.5,-0.1,"London","Europäisches Tor"],
+  lisbon:[38.7,-9.1,"Lissabon","Atlantik-Anlandung Europa"], frankfurt:[50.1,8.7,"Frankfurt","DE-CIX · #1 Knoten weltweit"],
+  marseille:[43.3,5.4,"Marseille","Mittelmeer-Drehkreuz"], lagos:[6.5,3.4,"Lagos","Westafrika-Landepunkt"],
+  capetown:[-33.9,18.4,"Kapstadt","Süd-Afrika-Tor"], mombasa:[-4,39.6,"Mombasa","Ostafrika-Landepunkt"],
+  dubai:[25.2,55.3,"Dubai","Nahost-Drehkreuz"], mumbai:[19,72.8,"Mumbai","Südasien-Tor"],
+  singapore:[1.35,103.8,"Singapur","Asien-Drehkreuz #1"], hongkong:[22.3,114.2,"Hongkong","Ostasien-Tor"],
+  tokyo:[35.7,139.7,"Tokio","Pazifik-Tor Asien"], sydney:[-33.9,151.2,"Sydney","Ozeanien-Tor"]
 };
 const LINKS=[
  ["newyork","london"],["newyork","lisbon"],["miami","fortaleza"],["fortaleza","saopaulo"],
@@ -100,79 +163,256 @@ const LINKS=[
  ["singapore","hongkong"],["hongkong","tokyo"],["tokyo","losangeles"],["singapore","sydney"],
  ["sydney","losangeles"],["losangeles","miami"],["miami","newyork"]
 ];
+function haversine(la1,lo1,la2,lo2){const R=6371,r=Math.PI/180;const dLa=(la2-la1)*r,dLo=(lo2-lo1)*r;
+  const a=Math.sin(dLa/2)**2+Math.cos(la1*r)*Math.cos(la2*r)*Math.sin(dLo/2)**2;return 2*R*Math.asin(Math.sqrt(a));}
 
-// gebogenen Pfad zwischen zwei Punkten als Punktliste (quadratische Kurve)
+/* ---------- Canvas & Projektion ---------- */
+const cv=document.getElementById("map"), ctx=cv.getContext("2d");
+const stage=cv.parentElement;
+let W=0,H=0,DPR=1;
+function px(lng){return (lng+180)/360*W;}
+function py(lat){return (90-lat)/180*H;}
+
+/* Land wird als Punktwolke aus countries-110m.geojson vorgerechnet (einmalig) */
+let LAND=[];            // [lng,lat] Stützpunkte auf Land
+let bg=null;            // Offscreen-Hintergrund (Ozean + Gitter + Land)
+function resize(){
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  W=stage.clientWidth; H=stage.clientHeight;
+  cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR);
+  cv.style.width=W+"px"; cv.style.height=H+"px";
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  buildBg();
+}
+window.addEventListener("resize",resize);
+
+function buildBg(){
+  if(!W||!H) return;
+  bg=document.createElement("canvas"); bg.width=Math.round(W*DPR); bg.height=Math.round(H*DPR);
+  const b=bg.getContext("2d"); b.setTransform(DPR,0,0,DPR,0,0);
+  // Ozean
+  const g=b.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,"#071528"); g.addColorStop(.5,"#0a1a33"); g.addColorStop(1,"#05101f");
+  b.fillStyle=g; b.fillRect(0,0,W,H);
+  // Gitter (Längen-/Breitengrade)
+  b.strokeStyle="rgba(120,160,230,0.06)"; b.lineWidth=1;
+  for(let lat=-60;lat<=60;lat+=30){b.beginPath();b.moveTo(0,py(lat));b.lineTo(W,py(lat));b.stroke();}
+  for(let lng=-150;lng<=150;lng+=30){b.beginPath();b.moveTo(px(lng),0);b.lineTo(px(lng),H);b.stroke();}
+  b.strokeStyle="rgba(120,160,230,0.11)"; b.beginPath();b.moveTo(0,py(0));b.lineTo(W,py(0));b.stroke(); // Äquator
+  // Land-Punkte
+  const s=Math.max(1.2, W/620);
+  b.fillStyle="rgba(74,128,214,0.85)";
+  for(let i=0;i<LAND.length;i++){ b.fillRect(px(LAND[i][0]), py(LAND[i][1]), s, s); }
+  // sanfte Vignette
+  const vg=b.createRadialGradient(W/2,H/2,Math.min(W,H)*0.35,W/2,H/2,Math.max(W,H)*0.75);
+  vg.addColorStop(0,"rgba(0,0,0,0)"); vg.addColorStop(1,"rgba(2,6,14,0.55)");
+  b.fillStyle=vg; b.fillRect(0,0,W,H);
+}
+
+/* ---------- Land aus GeoJSON abtasten ---------- */
+function ptInRing(lng,lat,ring){
+  let c=false;
+  for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+    const xi=ring[i][0],yi=ring[i][1],xj=ring[j][0],yj=ring[j][1];
+    if(((yi>lat)!=(yj>lat)) && (lng<(xj-xi)*(lat-yi)/(yj-yi)+xi)) c=!c;
+  }
+  return c;
+}
+function buildLandFrom(geo){
+  // Ringe mit Bounding-Box sammeln (schnelle Vorabweisung)
+  const polys=[];
+  for(const f of geo.features){
+    const gm=f.geometry; if(!gm) continue;
+    const groups = gm.type==="Polygon" ? [gm.coordinates] : gm.type==="MultiPolygon" ? gm.coordinates : [];
+    for(const poly of groups){
+      const outer=poly[0]; if(!outer||outer.length<4) continue;
+      let minx=180,miny=90,maxx=-180,maxy=-90;
+      for(const p of outer){ if(p[0]<minx)minx=p[0]; if(p[0]>maxx)maxx=p[0]; if(p[1]<miny)miny=p[1]; if(p[1]>maxy)maxy=p[1]; }
+      polys.push({bbox:[minx,miny,maxx,maxy], rings:poly});
+    }
+  }
+  // Raster abtasten
+  const step=1.1; // Grad
+  const out=[];
+  for(let lat=83; lat>-58; lat-=step){
+    for(let lng=-179; lng<180; lng+=step){
+      for(const pl of polys){
+        const bb=pl.bbox;
+        if(lng<bb[0]||lng>bb[2]||lat<bb[1]||lat>bb[3]) continue;
+        if(ptInRing(lng,lat,pl.rings[0])){
+          // Löcher (Seen) ausschließen
+          let hole=false;
+          for(let h=1;h<pl.rings.length;h++){ if(ptInRing(lng,lat,pl.rings[h])){hole=true;break;} }
+          if(!hole) out.push([lng,lat]);
+          break;
+        }
+      }
+    }
+  }
+  return out;
+}
+
+/* ---------- Live-Erdbeben (USGS, letzte 24 h) ---------- */
+let QUAKES=[];
+const EQ_URL="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
+function loadQuakes(){
+  fetch(EQ_URL).then(r=>r.json()).then(j=>{
+    const arr=[];
+    for(const f of (j.features||[])){
+      const c=f.geometry&&f.geometry.coordinates; const p=f.properties||{};
+      if(!c) continue;
+      const mag=p.mag; if(mag==null||mag<1.5) continue;
+      arr.push({lng:c[0], lat:c[1], depth:c[2], mag:mag, place:p.place||"unbekannt", time:p.time, url:p.url});
+    }
+    arr.sort((a,b)=>b.mag-a.mag);
+    QUAKES=arr.slice(0,140);
+    document.getElementById("eqcount").textContent=arr.length.toLocaleString("de-DE");
+  }).catch(()=>{ document.getElementById("eqcount").textContent="offline"; document.getElementById("eqled").style.background="#586588"; });
+}
+function eqColor(m){ return m>=6?[255,70,90] : m>=4.5?[255,120,80] : m>=3?[255,180,90] : [255,220,120]; }
+
+/* ---------- Bogen-Geometrie (Bildschirm-Quadratbezier) ---------- */
 function arcPoints(ax,ay,bx,by){
   const mx=(ax+bx)/2,my=(ay+by)/2,dx=bx-ax,dy=by-ay,len=Math.hypot(dx,dy)||1;
-  const off=Math.min(len*0.18, H*0.18);
+  const off=Math.min(len*0.22, H*0.30);
   const cxp=mx+(-dy/len)*off, cyp=my+(dx/len)*off;
-  const N=60,pts=[];
+  const N=64,pts=[];
   for(let i=0;i<=N;i++){const t=i/N,u=1-t;
     pts.push([u*u*ax+2*u*t*cxp+t*t*bx, u*u*ay+2*u*t*cyp+t*t*by]);}
   return pts;
 }
+let bursts=[];               // Einschlag-Ringe am Ziel
+const prevHead=new Array(LINKS.length).fill(0);
 
+/* ---------- Animation ---------- */
 let t0=null;
 function frame(ts){
   if(t0===null)t0=ts; const time=(ts-t0)/1000;
-  const sx=W/1000, sy=H/500;
   ctx.clearRect(0,0,W,H);
+  if(bg) ctx.drawImage(bg,0,0,W,H);
 
-  // Ozean-Hintergrund mit weichem Verlauf
-  const bg=ctx.createLinearGradient(0,0,0,H);
-  bg.addColorStop(0,"#071326"); bg.addColorStop(0.5,"#0a1830"); bg.addColorStop(1,"#050d1c");
-  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
-
-  // feines Gitter
-  ctx.strokeStyle="rgba(255,255,255,0.04)"; ctx.lineWidth=1;
-  for(let i=1;i<4;i++){ctx.beginPath();ctx.moveTo(0,H*i/4);ctx.lineTo(W,H*i/4);ctx.stroke();}
-  for(let i=1;i<6;i++){ctx.beginPath();ctx.moveTo(W*i/6,0);ctx.lineTo(W*i/6,H);ctx.stroke();}
-
-  // Land-Lichtpunkte
-  const sdot=Math.max(1.3, W/600);
-  for(const d of DOTS){
-    ctx.fillStyle="rgba(70,140,235,0.85)";
-    ctx.fillRect(d[0]*sx, d[1]*sy, sdot, sdot);
-  }
-
-  // Bögen + wandernde Pulse
-  ctx.lineWidth=Math.max(1.4, W/900); ctx.lineJoin="round";
+  // Bögen
+  ctx.lineJoin="round"; ctx.lineCap="round";
   for(let i=0;i<LINKS.length;i++){
     const A=HUBS[LINKS[i][0]],B=HUBS[LINKS[i][1]];
     const ax=px(A[1]),ay=py(A[0]),bx=px(B[1]),by=py(B[0]);
-    const pts=arcPoints(ax,ay,bx,by);
+    const pts=arcPoints(ax,ay,bx,by), N=pts.length;
+    // Grundlinie
     ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]);
     for(const p of pts)ctx.lineTo(p[0],p[1]);
-    ctx.strokeStyle="rgba(70,224,192,0.5)";
-    ctx.shadowColor="rgba(70,224,192,0.9)"; ctx.shadowBlur=8; ctx.stroke(); ctx.shadowBlur=0;
-    // Puls
-    const N=pts.length, head=((time*0.30 + i*0.11)%1);
-    for(let k=0;k<7;k++){
-      const tt=head-k*0.03; if(tt<0)continue;
-      const p=pts[Math.floor(tt*(N-1))];
-      ctx.globalAlpha=1-k/7;
-      ctx.fillStyle=k===0?"#eafffb":"#7ff0d8";
-      ctx.beginPath(); ctx.arc(p[0],p[1],k===0?3.6:2.2,0,7); ctx.fill();
+    ctx.lineWidth=Math.max(1,W/1300); ctx.strokeStyle="rgba(69,224,194,0.22)"; ctx.stroke();
+    // Komet
+    const speed=0.16+0.05*((i*37)%7)/7;
+    const head=((time*speed + i*0.13)%1);
+    if(head<prevHead[i]) bursts.push({x:bx,y:by,t:time,mag:1}); // Ziel erreicht → Einschlag
+    prevHead[i]=head;
+    const tail=26;
+    ctx.lineWidth=Math.max(1.6,W/820);
+    for(let k=0;k<tail;k++){
+      const tt=head-k*0.012; if(tt<0)break;
+      const idx=tt*(N-1), i0=Math.floor(idx), i1=Math.min(N-1,i0+1), f=idx-i0;
+      const x=pts[i0][0]+(pts[i1][0]-pts[i0][0])*f, y=pts[i0][1]+(pts[i1][1]-pts[i0][1])*f;
+      if(k===0){
+        ctx.fillStyle="#eafffb"; ctx.shadowColor="#7ff0d8"; ctx.shadowBlur=14;
+        ctx.beginPath(); ctx.arc(x,y,Math.max(2.4,W/560),0,7); ctx.fill(); ctx.shadowBlur=0;
+      }else{
+        ctx.globalAlpha=(1-k/tail)*0.8; ctx.fillStyle="#63ecd0";
+        ctx.beginPath(); ctx.arc(x,y,Math.max(1,W/1100)*(1-k/tail*0.5),0,7); ctx.fill();
+      }
     }
     ctx.globalAlpha=1;
   }
 
+  // Einschlag-Ringe
+  bursts=bursts.filter(b=>time-b.t<1.1);
+  for(const b of bursts){
+    const age=(time-b.t)/1.1, r=6+age*26;
+    ctx.globalAlpha=(1-age)*0.8; ctx.lineWidth=2; ctx.strokeStyle="#8ff3e0";
+    ctx.beginPath(); ctx.arc(b.x,b.y,r,0,7); ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+
+  // Live-Erdbeben (pulsierend)
+  for(let i=0;i<QUAKES.length;i++){
+    const q=QUAKES[i], x=px(q.lng), y=py(q.lat);
+    const col=eqColor(q.mag), base=Math.max(2.2, (q.mag-1)*1.7);
+    const ph=(time*1.3 + i*0.7)%1;
+    // Pulsring
+    ctx.globalAlpha=(1-ph)*0.55; ctx.lineWidth=1.4;
+    ctx.strokeStyle=`rgb(${col[0]},${col[1]},${col[2]})`;
+    ctx.beginPath(); ctx.arc(x,y,base+ph*(base*2.4),0,7); ctx.stroke();
+    // Kern
+    ctx.globalAlpha=0.9; ctx.fillStyle=`rgb(${col[0]},${col[1]},${col[2]})`;
+    ctx.shadowColor=`rgb(${col[0]},${col[1]},${col[2]})`; ctx.shadowBlur=8;
+    ctx.beginPath(); ctx.arc(x,y,base*0.55,0,7); ctx.fill(); ctx.shadowBlur=0;
+  }
+  ctx.globalAlpha=1;
+
   // Knotenpunkte + Namen
-  ctx.font=`600 ${Math.max(11,W/95)}px system-ui,sans-serif`; ctx.textBaseline="middle";
+  ctx.font=`600 ${Math.max(10,W/110)}px system-ui,sans-serif`; ctx.textBaseline="middle";
   const pulse=0.5+0.5*Math.sin(time*2);
   for(const k in HUBS){
     const h=HUBS[k], x=px(h[1]), y=py(h[0]);
-    ctx.globalAlpha=0.25+0.25*pulse; ctx.fillStyle="#ffcf66";
-    ctx.beginPath(); ctx.arc(x,y,8+4*pulse,0,7); ctx.fill();
-    ctx.globalAlpha=1; ctx.fillStyle="#ffd87a";
-    ctx.shadowColor="#ffcf66"; ctx.shadowBlur=10;
-    ctx.beginPath(); ctx.arc(x,y,3.2,0,7); ctx.fill(); ctx.shadowBlur=0;
-    ctx.textAlign=h[3];
-    ctx.lineWidth=3.5; ctx.strokeStyle="#050d1c"; ctx.strokeText(h[2], x+h[4], y+h[5]);
-    ctx.fillStyle="#eaf3ff"; ctx.fillText(h[2], x+h[4], y+h[5]);
+    ctx.globalAlpha=0.18+0.20*pulse; ctx.fillStyle="#ffce6a";
+    ctx.beginPath(); ctx.arc(x,y,7+4*pulse,0,7); ctx.fill();
+    ctx.globalAlpha=1; ctx.fillStyle="#ffd87a"; ctx.shadowColor="#ffce6a"; ctx.shadowBlur=10;
+    ctx.beginPath(); ctx.arc(x,y,3,0,7); ctx.fill(); ctx.shadowBlur=0;
+    // Label nur auf breiten Screens
+    if(W>620){
+      const right = h[1] < 150;
+      ctx.textAlign = right ? "left" : "right";
+      const dx = right ? 9 : -9;
+      ctx.lineWidth=3.5; ctx.strokeStyle="#050d1c"; ctx.strokeText(h[2], x+dx, y-9);
+      ctx.fillStyle="#eaf3ff"; ctx.fillText(h[2], x+dx, y-9);
+    }
   }
   requestAnimationFrame(frame);
 }
+
+/* ---------- Klick → Details (Knoten oder Erdbeben) ---------- */
+const gi=document.getElementById("ginfo"), giB=document.getElementById("ginfo-body");
+function closeGinfo(){ gi.classList.remove("on"); }
+cv.addEventListener("click",e=>{
+  const r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
+  // 1) Erdbeben zuerst (liegen oft dicht)
+  let bestQ=null,bd=16*16;
+  for(const q of QUAKES){ const dx=px(q.lng)-mx, dy=py(q.lat)-my, d=dx*dx+dy*dy; if(d<bd){bd=d;bestQ=q;} }
+  // 2) Knotenpunkte
+  let bestH=null,bh=18*18,bhId=null;
+  for(const k in HUBS){ const h=HUBS[k], dx=px(h[1])-mx, dy=py(h[0])-my, d=dx*dx+dy*dy; if(d<bh){bh=d;bestH=h;bhId=k;} }
+  if(bestH && (!bestQ || bh<=bd)){ showHub(bhId,bestH); return; }
+  if(bestQ){ showQuake(bestQ); return; }
+  closeGinfo();
+});
+function showHub(id,h){
+  const cnt=LINKS.filter(l=>l[0]===id||l[1]===id).length;
+  giB.innerHTML=
+    `<h3>${h[2]}</h3><div class="gsub">${h[3]||""}</div>`+
+    `<div class="grow"><span class="k">Breite</span><span class="v">${h[0].toFixed(1)}°</span></div>`+
+    `<div class="grow"><span class="k">Länge</span><span class="v">${h[1].toFixed(1)}°</span></div>`+
+    `<div class="grow"><span class="k">Kabel-Verbindungen</span><span class="v">${cnt}</span></div>`+
+    `<div class="gnote">Einer der großen Anlande- und Austauschpunkte des globalen Netzes.</div>`;
+  gi.classList.add("on");
+}
+function showQuake(q){
+  const when = q.time ? new Date(q.time).toLocaleString("de-DE",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}) : "—";
+  giB.innerHTML=
+    `<h3>Erdbeben M ${q.mag.toFixed(1)}</h3><div class="gsub">${q.place}</div>`+
+    `<div class="grow"><span class="k">Stärke</span><span class="v">${q.mag.toFixed(1)}</span></div>`+
+    `<div class="grow"><span class="k">Tiefe</span><span class="v">${q.depth!=null?q.depth.toFixed(0)+" km":"—"}</span></div>`+
+    `<div class="grow"><span class="k">Zeit</span><span class="v">${when}</span></div>`+
+    `<div class="gnote">Live-Daten des USGS (letzte 24 h). Starke Seebeben können Seekabel beschädigen und das Netz stören.</div>`;
+  gi.classList.add("on");
+}
+
+/* ---------- Start ---------- */
+resize();
+fetch("data/countries-110m.geojson").then(r=>r.json()).then(geo=>{
+  LAND=buildLandFrom(geo);
+  buildBg();
+  document.getElementById("loading").classList.add("off");
+}).catch(()=>{ document.getElementById("loading").textContent="Karte konnte nicht geladen werden."; });
+loadQuakes(); setInterval(loadQuakes, 180000); // alle 3 Minuten aktualisieren
 requestAnimationFrame(frame);
 </script>
 </body>
