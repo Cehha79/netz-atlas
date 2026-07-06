@@ -117,12 +117,21 @@
     letter-spacing:.3px; pointer-events:none}
   .maptitle{position:absolute; left:16px; top:14px; pointer-events:none}
   .maptitle b{font-size:13px; letter-spacing:.4px} .maptitle span{display:block; color:var(--muted); font-size:11px; margin-top:2px}
-  .sitefoot{border-top:1px solid var(--border); background:#070d18; padding:14px 16px;
-    display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap;
-    color:var(--muted); font-size:13px; letter-spacing:.2px}
-  .sitefoot a{color:var(--teal); text-decoration:none; font-weight:700}
-  .sitefoot a:hover{text-decoration:underline}
+  .sitefoot{border-top:1px solid var(--border); background:#070d18; padding:9px 20px;
+    display:flex; gap:12px 18px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+    color:var(--muted); font-size:13px}
+  .sitefoot .fbrand{color:var(--muted); text-decoration:none; display:inline-flex; align-items:center; gap:7px}
+  .sitefoot .fbrand .by{font-style:italic; font-size:12px}
+  .sitefoot .fbrand b{color:var(--teal); font-weight:700}
+  .sitefoot .fbrand .url{font-family:var(--mono); font-size:12px; color:var(--muted)}
+  .sitefoot .fbrand:hover b,.sitefoot .fbrand:hover .url{color:#7ff0d8}
+  .sitefoot .flinks{display:inline-flex; align-items:center; gap:14px; flex-wrap:wrap}
+  .sitefoot .flinks a{color:var(--muted); text-decoration:none; font-weight:500}
+  .sitefoot .flinks a:hover{color:var(--teal)}
   .sitefoot .dot{color:var(--dim)}
+  .sitefoot .fact{display:inline-flex; align-items:center; gap:6px; color:#fff; font-weight:650; padding:5px 13px; border-radius:999px; text-decoration:none; background:linear-gradient(170deg,#5a9bff,#2f5fd0)}
+  .sitefoot .fact.donate{background:linear-gradient(170deg,#f59e0b,#c2410c)}
+  .sitefoot .fact:hover{filter:brightness(1.1)}
 
   @media(max-width:1200px){
     body{height:auto; overflow:auto}
@@ -202,10 +211,6 @@
       <div class="maptitle"><b>GLOBALES SEEKABEL-NETZ</b><span>Haupt-Routen zwischen den großen Knotenpunkten</span></div>
       <div class="maplabel" id="maplabel">Schematische Darstellung · Routen repräsentativ · 👆 Knoten anklicken für die Laufzeit dorthin</div>
       <div class="routebox" id="routebox" style="display:none"></div>
-    </div>
-    <div class="sitefoot">
-      <span>🌐 Netz-Atlas</span><span class="dot">·</span>
-      <span>ein Projekt von <a href="https://www.mika-tec.com" target="_blank" rel="noopener">Mika-Tec</a></span>
     </div>
   </div>
 
@@ -670,6 +675,17 @@ function closeOv(){
 document.getElementById('ov').addEventListener('click',function(e){if(e.target===this)closeOv();});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeOv();});
 </script>
+<footer class="sitefoot">
+  <a class="fbrand" href="https://www.mika-tec.com" target="_blank" rel="noopener"><span class="by">by</span> <b>Mika-Tec</b> <span class="dot">·</span> <span class="url">www.mika-tec.com</span></a>
+  <nav class="flinks">
+    <a href="https://mika-tec.com/impressum.html" target="_blank" rel="noopener">Impressum</a>
+    <a href="https://mika-tec.com/datenschutz.html" target="_blank" rel="noopener">Datenschutz</a>
+    <a href="https://mika-tec.com/kontakt.html" target="_blank" rel="noopener">Kontakt</a>
+    <span class="dot">·</span>
+    <a class="fact" href="mailto:cehha79@gmail.com?subject=Feedback%20zu%20Netz-Atlas">💬 Feedback</a>
+    <a class="fact donate" href="https://paypal.me/mikatec" target="_blank" rel="noopener">♥ Spenden</a>
+  </nav>
+</footer>
 <div class="ov" id="ov"><div class="ovbox"><div class="ovhead" id="ovhead"></div><button class="ovx" onclick="closeOv()" aria-label="Schliessen">✕</button><div id="ovbody"></div></div></div>
 <div id="ovstash" hidden><div data-ovgroup="wissen">    <div class="card blue glossary">
       <h2><span class="ic">📖</span> Fachbegriffe</h2>
