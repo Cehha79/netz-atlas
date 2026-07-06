@@ -1,0 +1,15 @@
+# Nur lokal — nicht veröffentlichen
+
+# internes Projektgedächtnis (Planung, TODO, Datenquellen, Changelog)
+DOKU/
+# interne Arbeitsregeln für KI-Werkzeuge
+CLAUDE.md
+# lokale Editor-/Tool-Einstellungen
+.claude/
+
+# Betriebssystem / Editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
