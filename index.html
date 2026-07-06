@@ -14,7 +14,7 @@
   *{box-sizing:border-box; margin:0; padding:0}
   html,body{background:var(--bg); color:var(--text);
     font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; -webkit-font-smoothing:antialiased}
-  body{min-height:100vh; display:flex; flex-direction:column}
+  body{height:100vh; overflow:hidden; display:flex; flex-direction:column}
 
   /* ---------- Kopfzeile ---------- */
   .topbar{display:flex; align-items:center; justify-content:space-between;
@@ -34,9 +34,9 @@
   .status b{color:var(--text); font-variant-numeric:tabular-nums; font-family:var(--mono)}
 
   /* ---------- Layout ---------- */
-  .layout{flex:1; display:grid; grid-template-columns:300px minmax(0,1fr) 320px; gap:1px;
+  .layout{flex:1; min-height:0; display:grid; grid-template-columns:300px minmax(0,1fr) 320px; grid-template-rows:1fr; gap:1px;
     background:var(--border)}
-  .col{background:var(--bg); overflow-y:auto}
+  .col{background:var(--bg); overflow-y:auto; min-height:0}
   .col.left,.col.right{padding:18px}
   .col.center{padding:0; display:flex; flex-direction:column; background:#05080f}
 
@@ -125,15 +125,28 @@
   .sitefoot .dot{color:var(--dim)}
 
   @media(max-width:1100px){
-    .layout{grid-template-columns:1fr}
+    body{height:auto; overflow:auto}
+    .layout{grid-template-columns:1fr; grid-template-rows:auto}
+    .col{overflow:visible}
     .col.center{order:-1; min-height:60vh}
     .mapwrap{min-height:50vh}
   }
   .col::-webkit-scrollbar{width:8px} .col::-webkit-scrollbar-thumb{background:#1c2742; border-radius:4px}
+
+  /* Kachel-Knoepfe in der Navi + Info-Maske */
+  .navtile{cursor:pointer;border:1px solid #1b2742;font:inherit;color:#cdd8ff;padding:6px 12px;border-radius:8px;background:#101a30;display:inline-flex;align-items:center;gap:6px}
+  .navtile:hover{background:#16233d;color:#fff}
+  .navsep{width:1px;background:#22314f;margin:2px 4px;align-self:stretch}
+  .ov{position:fixed;inset:0;background:rgba(4,8,15,.72);backdrop-filter:blur(3px);display:none;align-items:flex-start;justify-content:center;padding:6vh 16px 16px;z-index:100000;overflow:auto}
+  .ov.open{display:flex}
+  .ovbox{position:relative;max-width:580px;width:100%}
+  .ovbox .card{margin:0}
+  .ovx{position:absolute;top:-8px;right:-8px;background:#101a30;border:1px solid var(--border);color:var(--text);width:32px;height:32px;border-radius:9px;cursor:pointer;font-size:15px;z-index:2}
+  .ovx:hover{background:#16233d}
 </style>
 </head>
 <body>
-<nav id="atlasnav" style="position:sticky;top:0;z-index:99999;display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;background:#070d18;border-bottom:1px solid #1b2742;font-family:system-ui,-apple-system,sans-serif;font-size:13px"><a href="index.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">📊 Übersicht</a><a href="globus.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">🌍 Globus</a><a href="flachkarte.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">🛰️ Flache Karte</a></nav>
+<nav id="atlasnav" style="position:sticky;top:0;z-index:99999;display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;background:#070d18;border-bottom:1px solid #1b2742;font-family:system-ui,-apple-system,sans-serif;font-size:13px"><a href="index.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">📊 Übersicht</a><a href="globus.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">🌍 Globus</a><a href="flachkarte.html" style="color:#cdd8ff;text-decoration:none;padding:6px 12px;border-radius:8px;background:#101a30">🛰️ Flache Karte</a><span class="navsep"></span><button class="navtile" onclick="openOv('gloss')">📖 Fachbegriffe</button><button class="navtile" onclick="openOv('links')">🔗 Wichtige Links</button><button class="navtile" onclick="openOv('quellen')">📑 Quellen</button></nav>
 
 
 <div class="topbar">
@@ -174,15 +187,6 @@
       <a class="clink" href="https://wondernetwork.com/pings" target="_blank" rel="noopener">⏱️ Welt-Ping-Tabelle ↗</a>
     </div>
 
-    <div class="card blue glossary">
-      <h2><span class="ic">📖</span> Fachbegriffe</h2>
-      <div class="note" style="margin:-6px 0 10px">Tippe auf einen Begriff → öffnet die Erklärung bei Wikipedia.</div>
-      <div class="row"><a class="term" href="https://de.wikipedia.org/wiki/Backbone-Netz" target="_blank" rel="noopener">Backbone ↗</a><span class="ipa">bäck-boun</span><div class="def">Das „Rückgrat": die großen Haupt-Leitungen, die alles tragen.</div></div>
-      <div class="row"><a class="term" href="https://de.wikipedia.org/wiki/Seekabel" target="_blank" rel="noopener">Submarine Cable ↗</a><span class="ipa">ssab-ma-rien kei-bl</span><div class="def">Seekabel — Glasfaser-Bündel am Meeresboden.</div></div>
-      <div class="row"><a class="term" href="https://de.wikipedia.org/wiki/Internet-Knoten" target="_blank" rel="noopener">IXP ↗</a><span class="ipa">ai-eks-pi</span><div class="def">Internet Exchange Point — die Kreuzung, wo Anbieter Daten tauschen.</div></div>
-      <div class="row"><a class="term" href="https://de.wikipedia.org/wiki/Latenzzeit" target="_blank" rel="noopener">Latency ↗</a><span class="ipa">lei-tn-si</span><div class="def">Laufzeit — wie lange ein Signal für den Weg braucht.</div></div>
-      <div class="row"><a class="term" href="https://de.wikipedia.org/wiki/Daten%C3%BCbertragungsrate" target="_blank" rel="noopener">Bandwidth ↗</a><span class="ipa">bänd-witth</span><div class="def">Bandbreite — wie viele Daten gleichzeitig durchpassen.</div></div>
-    </div>
 
     <div class="card blue">
       <h2><span class="ic">🏙️</span> Große Knotenpunkte</h2>
@@ -205,34 +209,7 @@
       <div class="stat"><span class="k">Lebensdauer eines Kabels</span><span class="v">~25<span class="u">Jahre</span></span></div>
     </div>
 
-    <div class="card links">
-      <h2><span class="ic">🔗</span> Wichtige Links</h2>
-      <div class="sub">Die besten Quellen, um tiefer einzutauchen — alle öffnen in einem neuen Tab.</div>
-      <a href="https://www.submarinecablemap.com/" target="_blank" rel="noopener">
-        <span class="ic2">🌍</span><span><span class="lt">Submarine Cable Map</span><span class="ld">Die offizielle Welt-Karte aller Seekabel (TeleGeography).</span></span><span class="ext">↗</span></a>
-      <a href="https://radar.cloudflare.com/" target="_blank" rel="noopener">
-        <span class="ic2">📊</span><span><span class="lt">Cloudflare Radar</span><span class="ld">Live-Statistiken zum weltweiten Internet-Verkehr.</span></span><span class="ext">↗</span></a>
-      <a href="https://pulse.internetsociety.org/" target="_blank" rel="noopener">
-        <span class="ic2">🩺</span><span><span class="lt">Internet Society Pulse</span><span class="ld">Gesundheit & Ausfälle des Internets weltweit.</span></span><span class="ext">↗</span></a>
-      <a href="https://www.peeringdb.com/" target="_blank" rel="noopener">
-        <span class="ic2">🔌</span><span><span class="lt">PeeringDB</span><span class="ld">Datenbank aller Knotenpunkte & Rechenzentren.</span></span><span class="ext">↗</span></a>
-      <a href="https://speed.cloudflare.com/" target="_blank" rel="noopener">
-        <span class="ic2">⚡</span><span><span class="lt">Cloudflare Speedtest</span><span class="ld">Offizieller Geschwindigkeits-Test (Vergleich zu oben).</span></span><span class="ext">↗</span></a>
-      <a href="https://de.wikipedia.org/wiki/Internet" target="_blank" rel="noopener">
-        <span class="ic2">📖</span><span><span class="lt">Wikipedia: Internet</span><span class="ld">Der große Überblick — wie alles zusammenhängt.</span></span><span class="ext">↗</span></a>
-    </div>
 
-    <div class="card links">
-      <h2><span class="ic">📑</span> Quellen & Stand</h2>
-      <div class="sub">Woher die Zahlen oben stammen. Es sind gerundete Richtwerte — die echten Zahlen ändern sich laufend.</div>
-      <a href="https://www.submarinecablemap.com/" target="_blank" rel="noopener">
-        <span class="ic2">🌍</span><span><span class="lt">TeleGeography</span><span class="ld">Anzahl & Länge der Seekabel, Anlandungs-Stationen.</span></span><span class="ext">↗</span></a>
-      <a href="https://www.peeringdb.com/" target="_blank" rel="noopener">
-        <span class="ic2">🔌</span><span><span class="lt">PeeringDB</span><span class="ld">Zahl der Knotenpunkte (IXP) weltweit.</span></span><span class="ext">↗</span></a>
-      <a href="https://wondernetwork.com/pings" target="_blank" rel="noopener">
-        <span class="ic2">⏱️</span><span><span class="lt">WonderNetwork Pings</span><span class="ld">Typische Laufzeiten zwischen Städten.</span></span><span class="ext">↗</span></a>
-      <div class="note" style="margin-top:10px">Die Angabe „~95 % über Seekabel" ist ein in der Branche gängiger Richtwert (u. a. ITU). Stand der Seite: Juni 2026.</div>
-    </div>
   </div>
 
   <!-- ============ MITTE: Karte ============ -->
@@ -724,6 +701,50 @@ setInterval(measureUpload, 25000);
 })();
 
 // (Fakten stehen jetzt als Panel in der linken Spalte)
+
+/* ---- Info-Masken (Fachbegriffe / Links / Quellen) ---- */
+function openOv(k){var el=document.querySelector('#ovcards [data-ov="'+k+'"]');if(!el)return;document.getElementById('ovbody').innerHTML=el.innerHTML;document.getElementById('ov').classList.add('open');}
+function closeOv(){document.getElementById('ov').classList.remove('open');}
+document.getElementById('ov').addEventListener('click',function(e){if(e.target===this)closeOv();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeOv();});
 </script>
+<div class="ov" id="ov"><div class="ovbox"><button class="ovx" onclick="closeOv()" aria-label="Schliessen">✕</button><div id="ovbody"></div></div></div>
+<div id="ovcards" hidden><div data-ov="gloss">    <div class="card blue glossary">
+      <h2><span class="ic">📖</span> Fachbegriffe</h2>
+      <div class="note" style="margin:-6px 0 10px">Tippe auf einen Begriff → öffnet die Erklärung bei Wikipedia.</div>
+      <div class="row"><a class="term" href="https://de.wikipedia.org/wiki/Backbone-Netz" target="_blank" rel="noopener">Backbone ↗</a><span class="ipa">bäck-boun</span><div class="def">Das „Rückgrat": die großen Haupt-Leitungen, die alles tragen.</div></div>
+      <div class="row"><a class="term" href="https://de.wikipedia.org/wiki/Seekabel" target="_blank" rel="noopener">Submarine Cable ↗</a><span class="ipa">ssab-ma-rien kei-bl</span><div class="def">Seekabel — Glasfaser-Bündel am Meeresboden.</div></div>
+      <div class="row"><a class="term" href="https://de.wikipedia.org/wiki/Internet-Knoten" target="_blank" rel="noopener">IXP ↗</a><span class="ipa">ai-eks-pi</span><div class="def">Internet Exchange Point — die Kreuzung, wo Anbieter Daten tauschen.</div></div>
+      <div class="row"><a class="term" href="https://de.wikipedia.org/wiki/Latenzzeit" target="_blank" rel="noopener">Latency ↗</a><span class="ipa">lei-tn-si</span><div class="def">Laufzeit — wie lange ein Signal für den Weg braucht.</div></div>
+      <div class="row"><a class="term" href="https://de.wikipedia.org/wiki/Daten%C3%BCbertragungsrate" target="_blank" rel="noopener">Bandwidth ↗</a><span class="ipa">bänd-witth</span><div class="def">Bandbreite — wie viele Daten gleichzeitig durchpassen.</div></div>
+    </div>
+</div><div data-ov="links">    <div class="card links">
+      <h2><span class="ic">🔗</span> Wichtige Links</h2>
+      <div class="sub">Die besten Quellen, um tiefer einzutauchen — alle öffnen in einem neuen Tab.</div>
+      <a href="https://www.submarinecablemap.com/" target="_blank" rel="noopener">
+        <span class="ic2">🌍</span><span><span class="lt">Submarine Cable Map</span><span class="ld">Die offizielle Welt-Karte aller Seekabel (TeleGeography).</span></span><span class="ext">↗</span></a>
+      <a href="https://radar.cloudflare.com/" target="_blank" rel="noopener">
+        <span class="ic2">📊</span><span><span class="lt">Cloudflare Radar</span><span class="ld">Live-Statistiken zum weltweiten Internet-Verkehr.</span></span><span class="ext">↗</span></a>
+      <a href="https://pulse.internetsociety.org/" target="_blank" rel="noopener">
+        <span class="ic2">🩺</span><span><span class="lt">Internet Society Pulse</span><span class="ld">Gesundheit & Ausfälle des Internets weltweit.</span></span><span class="ext">↗</span></a>
+      <a href="https://www.peeringdb.com/" target="_blank" rel="noopener">
+        <span class="ic2">🔌</span><span><span class="lt">PeeringDB</span><span class="ld">Datenbank aller Knotenpunkte & Rechenzentren.</span></span><span class="ext">↗</span></a>
+      <a href="https://speed.cloudflare.com/" target="_blank" rel="noopener">
+        <span class="ic2">⚡</span><span><span class="lt">Cloudflare Speedtest</span><span class="ld">Offizieller Geschwindigkeits-Test (Vergleich zu oben).</span></span><span class="ext">↗</span></a>
+      <a href="https://de.wikipedia.org/wiki/Internet" target="_blank" rel="noopener">
+        <span class="ic2">📖</span><span><span class="lt">Wikipedia: Internet</span><span class="ld">Der große Überblick — wie alles zusammenhängt.</span></span><span class="ext">↗</span></a>
+    </div>
+</div><div data-ov="quellen">    <div class="card links">
+      <h2><span class="ic">📑</span> Quellen & Stand</h2>
+      <div class="sub">Woher die Zahlen oben stammen. Es sind gerundete Richtwerte — die echten Zahlen ändern sich laufend.</div>
+      <a href="https://www.submarinecablemap.com/" target="_blank" rel="noopener">
+        <span class="ic2">🌍</span><span><span class="lt">TeleGeography</span><span class="ld">Anzahl & Länge der Seekabel, Anlandungs-Stationen.</span></span><span class="ext">↗</span></a>
+      <a href="https://www.peeringdb.com/" target="_blank" rel="noopener">
+        <span class="ic2">🔌</span><span><span class="lt">PeeringDB</span><span class="ld">Zahl der Knotenpunkte (IXP) weltweit.</span></span><span class="ext">↗</span></a>
+      <a href="https://wondernetwork.com/pings" target="_blank" rel="noopener">
+        <span class="ic2">⏱️</span><span><span class="lt">WonderNetwork Pings</span><span class="ld">Typische Laufzeiten zwischen Städten.</span></span><span class="ext">↗</span></a>
+      <div class="note" style="margin-top:10px">Die Angabe „~95 % über Seekabel" ist ein in der Branche gängiger Richtwert (u. a. ITU). Stand der Seite: Juni 2026.</div>
+    </div>
+</div></div>
 </body>
 </html>
