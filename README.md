@@ -12,7 +12,7 @@
 Eine anschauliche, ehrliche Übersicht über das **echte Internet** — die Seekabel
 unter dem Meer, die großen Knotenpunkte und die Laufzeiten dazwischen. Mit echten
 Live-Daten zu Erdbeben, Internet-Ausfällen und Routing-Ereignissen. Ein Projekt
-von **MikaTec** (Hasan Tepegöz).
+von **MikaTec**.
 
 > Statische Seite in Vanilla HTML/CSS/JavaScript — **kein Build, kein Framework,
 > kein Server-Backend**. Der 3D-Globus ist lokal gebundelt und läuft offline.
@@ -111,4 +111,4 @@ sorgt für die direkte Auslieferung der statischen Dateien. GitHub cacht rund
 
 ---
 
-Konzept & Umsetzung: **Hasan Tepegöz** · © MikaTec · [www.mika-tec.com](https://www.mika-tec.com)
+Konzept & Umsetzung: **MikaTec** · © MikaTec · [www.mika-tec.com](https://www.mika-tec.com)
