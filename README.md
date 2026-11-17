@@ -27,9 +27,10 @@ gibt, steht ein geprüfter Stand mit ehrlichem Hinweis — nie eine erfundene Za
 
 ## Ansichten
 
-- **Übersicht** (`index.html`) — Karten „Das Netz in Zahlen" (aktive Seekabel,
-  live), „Typische Laufzeiten", „Deine Verbindung · Live" (Standort, IP, Anbieter)
-  und „Netz-Qualität · echte Messung" (Ping/Tempo gegen Cloudflare). Dazu ein
+- **Übersicht** (`index.html`) — Karten „Das Netz in Zahlen" (Kennzahlen mit Quelle
+  und Stand), „Typische Laufzeiten", „Deine Verbindung" (Standort, IP, Anbieter)
+  und „Netz-Qualität · echte Messung" (Ping/Tempo gegen Cloudflare). Standortabfrage
+  und Messung starten erst nach einem Klick und laufen einmal. Dazu ein
   schematisches Seekabel-Netz auf Canvas und die Modals „Wissen" und „Dein System".
 - **Globus** (`globus.html`) — echter **3D-WebGL-Globus** (globe.gl): gepunktete
   Kontinente aus Geodaten, animierte Kabel-Bögen im Kometen-Effekt, pulsierende
@@ -44,7 +45,7 @@ gibt, steht ein geprüfter Stand mit ehrlichem Hinweis — nie eine erfundene Za
 |---|---|---|
 | 🌋 Erdbeben | USGS | Beben der letzten 24 h, Farbe nach Stärke |
 | 🔌 Ausfälle | IODA | landesweite Internet-Störungen, Marker am Land |
-| 📡 BGP-Live | RIPE RIS | Routing-Updates in Echtzeit an 25 echten Kollektor-Standorten |
+| 📡 BGP-Live | RIPE RIS | zurückgezogene Routen in Echtzeit an 25 echten Kollektor-Standorten |
 
 Jede Ebene ist einzeln zuschaltbar. Der BGP-Stream (WebSocket) ist standardmäßig
 **aus** und öffnet nur beim Einschalten — das schont Bandbreite.
@@ -54,9 +55,11 @@ Jede Ebene ist einzeln zuschaltbar. Der BGP-Stream (WebSocket) ist standardmäß
 - Alle Live-Quellen sind **öffentlich, kostenlos und ohne Schlüssel** erreichbar
   (CORS oder WebSocket) und wurden vor dem Einbau mit echten Abrufen getestet.
 - Statt erfundener „Cyber-Angriffs-Karten" zeigt Netz-Atlas **echte** Ereignisse.
-- Die Seekabel-Zahl kommt live von `submarinecablemap.com` (über CORS-Proxy);
-  fällt der Abruf aus, bleibt der geprüfte Stand stehen.
-- Weitere Quellen: GeoIP-Dienste (Standort/IP), Cloudflare (Tempo-/Ping-Messung),
+- Die Kennzahlen der Übersicht sind feste Werte mit Quelle und Stand (TeleGeography,
+  Packet Clearing House); sie werden nicht beim Öffnen abgerufen.
+- Abrufe, die den Besucher selbst betreffen (Standort, IP, Messung der Verbindung,
+  BGP-Strom), starten nur nach einem Klick; der Hinweis dazu steht am Knopf.
+- Live-Quellen: GeoJS (Standort/IP), Cloudflare (Tempo-/Ping-Messung),
   USGS (Erdbeben), IODA (Ausfälle), RIPE RIS (BGP) — alle öffentlich und ohne Schlüssel.
 
 ## Tech-Stack
@@ -66,7 +69,7 @@ Jede Ebene ist einzeln zuschaltbar. Der BGP-Stream (WebSocket) ist standardmäß
 | Markup | HTML5, drei eigenständige Seiten mit gemeinsamem Rahmen |
 | Styling | CSS3 — Custom Properties, Grid, Flexbox, `clamp()`, Media Queries |
 | Interaktion | Vanilla JavaScript; Canvas 2D (Karten), WebGL via globe.gl (Globus) |
-| Live-Daten | `fetch` (USGS, IODA, GeoIP, Cloudflare, submarinecablemap) · WebSocket (RIPE RIS) |
+| Live-Daten | `fetch` (USGS, IODA; nach Klick GeoJS und Cloudflare) · WebSocket (RIPE RIS, nach Klick) |
 | Geodaten | `data/countries-110m.geojson` (Natural Earth) |
 | Bibliothek | `vendor/globe.gl.min.js` (globe.gl inkl. three.js), lokal gebundelt |
 | Hosting | GitHub Pages, Auslieferung aus dem Repo-Root |
@@ -81,7 +84,8 @@ netz-atlas/
 ├── data/
 │   └── countries-110m.geojson    ← Ländergrenzen für die gepunkteten Kontinente
 ├── vendor/
-│   └── globe.gl.min.js           ← globe.gl (inkl. three.js), lokal
+│   ├── globe.gl.min.js           ← globe.gl (inkl. three.js), lokal
+│   └── LIZENZEN-globe.gl.txt     ← Lizenztexte der Bibliothek und ihrer Bestandteile
 ├── README.md                     ← diese Datei
 ├── .gitignore
 └── .nojekyll                     ← GitHub Pages liefert statische Dateien direkt aus

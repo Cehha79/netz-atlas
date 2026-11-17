@@ -59,6 +59,10 @@
     background:#0b1b2e; border:1px solid #1c3350; border-radius:999px; padding:4px 11px;
     margin:10px 6px 0 0; text-decoration:none; transition:background .15s}
   .clink:hover{background:#11293f}
+  .cbtn{display:block; width:100%; margin:8px 0 2px; padding:7px 10px; font:inherit; font-size:12px; font-weight:600; color:var(--teal);
+    background:#0d2136; border:1px solid #1d4a5e; border-radius:999px; cursor:pointer}
+  .cbtn:hover{background:#11293f}
+  .cbtn:disabled{opacity:.55; cursor:default}
   a.term{color:#dfe9ff; text-decoration:none; border-bottom:1px dotted #3a5a93}
   a.term:hover{color:var(--teal); border-color:var(--teal)}
   .links a{display:flex; gap:11px; align-items:flex-start; padding:10px 0;
@@ -104,6 +108,7 @@
     background:linear-gradient(90deg,var(--teal),var(--blue)); width:0; transition:width .6s ease}
 
   .note{color:var(--dim); font-size:10.5px; line-height:1.4; margin-top:3px}
+  .note.klar{color:var(--muted); font-size:11px}
 
   /* ---------- Karte ---------- */
   .mapwrap{position:relative; flex:1; min-height:340px}
@@ -189,14 +194,16 @@
   <div class="col left">
     <div class="card">
       <h2><span class="ic">🛰️</span> Das Netz in Zahlen</h2>
-      <div class="hero"><div class="n" id="cableCount">694</div><div class="l">aktive Seekabel weltweit · <span id="cableStat" style="color:var(--dim)">Stand Juni 2026</span></div></div>
+      <div class="hero"><div class="n">&gt; 600</div><div class="l">Seekabel, aktiv und geplant · <span style="color:var(--dim)">Stand 2026</span></div></div>
       <div class="rows">
-        <div class="stat"><span class="k">Gesamtlänge der Kabel</span><span class="v">~1,48 Mio<span class="u">km</span></span></div>
-        <div class="stat"><span class="k">Verkehr über Seekabel</span><span class="v">~95<span class="u">%</span></span></div>
-        <div class="stat"><span class="k">Anlandungs-Stationen</span><span class="v" id="landingCount">1.916</span></div>
-        <div class="stat"><span class="k">Knotenpunkte (IXP)</span><span class="v">~1.000</span></div>
+        <div class="stat"><span class="k">Kabellänge in Betrieb</span><span class="v">&gt; 1,5 Mio<span class="u">km</span></span></div>
+        <div class="stat"><span class="k">Verkehr zwischen Kontinenten über Seekabel</span><span class="v">&gt; 95<span class="u">%</span></span></div>
+        <div class="stat"><span class="k">Länder mit Internet-Knoten (IXP)</span><span class="v">162</span></div>
       </div>
+      <div class="note klar">Kabelzahl und Länge: TeleGeography, Stand 2026. Der Anteil des Verkehrs ist eine verbreitete Schätzung, gemessen ist er nicht. Länder mit Knoten: Packet Clearing House, Stand 17.11.2026.</div>
       <a class="clink" href="https://www.submarinecablemap.com/" target="_blank" rel="noopener">🌍 Echte Welt-Kabelkarte ↗</a>
+      <a class="clink" href="https://www2.telegeography.com/submarine-cable-faqs-frequently-asked-questions" target="_blank" rel="noopener">📄 Quelle der Kabelzahlen ↗</a>
+      <a class="clink" href="https://www.pch.net/ixp/summary" target="_blank" rel="noopener">📄 Quelle der Knotenzahl ↗</a>
       <a class="clink" href="https://de.wikipedia.org/wiki/Seekabel" target="_blank" rel="noopener">📖 Seekabel erklärt ↗</a>
     </div>
 
@@ -233,12 +240,14 @@
   <!-- ============ RECHTS: Live ============ -->
   <div class="col right">
     <div class="card conn">
-      <h2><span class="ic">📡</span> Deine Verbindung · Live</h2>
+      <h2><span class="ic">📡</span> Deine Verbindung</h2>
       <div class="sub">Wer du im Internet bist: dein ungefährer <b>Standort</b>, deine <b>IP-Adresse</b> (deine Hausnummer im Netz) und dein <b>Internet-Anbieter</b>.</div>
       <div class="you">
         <div class="ring">📍</div>
-        <div class="t"><b id="cLoc">wird ermittelt…</b><span id="cIsp">Anbieter wird geladen…</span></div>
+        <div class="t"><b id="cLoc">Standort nicht abgefragt</b><span id="cIsp">Die Abfrage startet erst nach deinem Klick.</span></div>
       </div>
+      <button class="cbtn" id="cGeoBtn" type="button">Standort, IP und Anbieter abfragen</button>
+      <div class="note klar" id="cGeoNote">Die Abfrage sendet deine IP-Adresse an den Standort-Dienst GeoJS (geojs.io). Ohne Klick fragt die Seite nichts ab.</div>
       <div class="rows">
         <div class="stat"><span class="k">IP-Adresse</span><span class="v" id="cIp">—</span></div>
         <div class="stat"><span class="k">Verbindungstyp</span><span class="v" id="cType">—</span></div>
@@ -246,21 +255,22 @@
         <div class="bar"><i id="cDownBar"></i></div>
         <div class="stat"><span class="k">Geschätzte Laufzeit</span><span class="v" id="cRtt">—</span></div>
       </div>
-      <div class="note" id="cNote">Werte kommen direkt aus deinem Browser und einem öffentlichen Standort-Dienst.</div>
+      <div class="note" id="cNote">Verbindungstyp, Tempo und Laufzeit meldet dein Browser selbst; sie verlassen dein Gerät nicht.</div>
     </div>
 
     <div class="card">
       <h2><span class="ic">📶</span> Netz-Qualität · echte Messung</h2>
-      <div class="sub">Wie <b>schnell &amp; stabil</b> dein Anschluss gerade ist — gerade eben gegen einen Server gemessen: Antwortzeit, Tempo runter/rauf und Schwankung.</div>
-      <div class="hero"><div class="n" id="liveLat">—</div><div class="l">Ping / Latenz · live gemessen (ms)</div></div>
+      <div class="sub">Wie <b>schnell &amp; stabil</b> dein Anschluss ist, auf Knopfdruck gegen einen Server gemessen: Antwortzeit, Tempo runter/rauf und Schwankung.</div>
+      <button class="cbtn" id="liveBtn" type="button">Messung starten</button>
+      <div class="note klar" id="liveNote">Die Messung startet erst nach deinem Klick und läuft einmal: kurze Abrufe für die Antwortzeit, dann 5 MB herunter und 2 MB hinauf, gegen das Server-Netz von Cloudflare. Dabei erfährt Cloudflare deine IP-Adresse.</div>
+      <div class="hero"><div class="n" id="liveLat">—</div><div class="l">Ping / Latenz · gemessen (ms)</div></div>
       <canvas id="spark" class="spark"></canvas>
       <div class="rows">
-        <div class="stat"><span class="k">Download (gemessen)</span><span class="v" id="liveDown">messe…</span></div>
-        <div class="stat"><span class="k">Upload (gemessen)</span><span class="v" id="liveUp">messe…</span></div>
+        <div class="stat"><span class="k">Download (gemessen)</span><span class="v" id="liveDown">—</span></div>
+        <div class="stat"><span class="k">Upload (gemessen)</span><span class="v" id="liveUp">—</span></div>
         <div class="stat"><span class="k">Schwankung (Jitter)</span><span class="v" id="liveJit">—</span></div>
         <div class="stat"><span class="k">Bewertung</span><span class="v" id="liveGrade">—</span></div>
       </div>
-      <div class="note" id="liveNote">Echte Messung gegen ein weltweites Server-Netz (Cloudflare). Läuft automatisch.</div>
     </div>
 
 
@@ -616,45 +626,35 @@ function netInfo(){
       document.getElementById("cDownBar").style.width=Math.min(100,mb/2.5*100)+"%";}
     if(c.rtt) document.getElementById("cRtt").textContent=c.rtt+" ms";
   }else{
-    document.getElementById("cNote").textContent="Safari gibt diese Werte nicht direkt frei — sie werden unten live selbst gemessen und hier eingetragen.";
+    document.getElementById("cNote").textContent="Dein Browser gibt diese Werte nicht frei. Nach einer Messung unten werden sie hier eingetragen.";
   }
 }
 netInfo();
 const c0=navigator.connection; if(c0&&c0.addEventListener)c0.addEventListener("change",netInfo);
 
-// Reserve: Standort übers Gerät (für den Karten-Punkt)
-function tryGeolocation(){
-  if(!navigator.geolocation)return;
-  navigator.geolocation.getCurrentPosition(p=>{
-    USER={lat:p.coords.latitude,lon:p.coords.longitude};
-    const el=document.getElementById("cLoc");
-    if(el.textContent.startsWith("Standort nicht"))el.textContent="Standort (per Gerät) ✓";
-  },()=>{},{timeout:8000,maximumAge:600000});
-}
-
-// IP / Anbieter / Standort — mehrere Anbieter als Reserve
+// IP, Anbieter und Standort: ein Dienst, erst nach Klick des Besuchers.
 async function geoLookup(){
-  const tries=[
-    ["https://ipwho.is/", d=>d&&d.success!==false&&d.ip?{ip:d.ip,city:d.city,country:d.country,isp:d.connection&&(d.connection.isp||d.connection.org),lat:d.latitude,lon:d.longitude}:null],
-    ["https://get.geojs.io/v1/ip/geo.json", d=>d&&d.ip?{ip:d.ip,city:d.city,country:d.country,isp:d.organization_name||d.organization,lat:parseFloat(d.latitude),lon:parseFloat(d.longitude)}:null],
-    ["https://ipapi.co/json/", d=>d&&d.ip?{ip:d.ip,city:d.city,country:d.country_name,isp:d.org,lat:d.latitude,lon:d.longitude}:null]
-  ];
-  for(const [u,map] of tries){
-    try{const r=await fetch(u,{cache:"no-store"}); if(!r.ok)continue; const o=map(await r.json()); if(o&&o.ip)return o;}catch(e){}
-  }
-  return null;
+  const r=await fetch("https://get.geojs.io/v1/ip/geo.json",{cache:"no-store"});
+  if(!r.ok)throw 0;
+  const d=await r.json();
+  if(!d||!d.ip)throw 0;
+  return {ip:d.ip,city:d.city,country:d.country,isp:d.organization_name||d.organization,lat:parseFloat(d.latitude),lon:parseFloat(d.longitude)};
 }
-geoLookup().then(o=>{
-  if(!o)throw 0;
-  document.getElementById("cIp").textContent=o.ip;
-  document.getElementById("cLoc").textContent=(o.city?o.city+", ":"")+(o.country||"");
-  document.getElementById("cIsp").textContent=o.isp||"Anbieter unbekannt";
-  if(typeof o.lat==="number"&&!isNaN(o.lat)){USER={lat:o.lat,lon:o.lon};}
-}).catch(()=>{
-  document.getElementById("cLoc").textContent="Standort nicht abrufbar";
-  document.getElementById("cIsp").textContent="(Browser blockiert den Abruf — siehe Hinweis unten)";
-  document.getElementById("cIp").textContent="—";
-  tryGeolocation();
+document.getElementById("cGeoBtn").addEventListener("click",function(){
+  const knopf=this;
+  knopf.disabled=true; knopf.textContent="Abfrage läuft …";
+  geoLookup().then(o=>{
+    document.getElementById("cIp").textContent=o.ip;
+    document.getElementById("cLoc").textContent=(o.city?o.city+", ":"")+(o.country||"");
+    document.getElementById("cIsp").textContent=o.isp||"Anbieter unbekannt";
+    if(typeof o.lat==="number"&&!isNaN(o.lat)){USER={lat:o.lat,lon:o.lon};}
+    knopf.textContent="Abgefragt";
+  }).catch(()=>{
+    document.getElementById("cLoc").textContent="Standort nicht abrufbar";
+    document.getElementById("cIsp").textContent="Der Dienst ist nicht erreichbar oder dein Browser blockiert den Abruf.";
+    document.getElementById("cIp").textContent="—";
+    knopf.disabled=false; knopf.textContent="Erneut abfragen";
+  });
 });
 
 // Sitzungs-Aktivität
@@ -665,7 +665,7 @@ setInterval(()=>{
   document.getElementById("aUptime").textContent=String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
 },500);
 
-/* ---- ECHTE Live-Messung: Ping + Download ---- */
+/* ---- Echte Messung: Ping, Download, Upload. Startet nur nach Klick und läuft einmal. ---- */
 const PING_URL="https://speed.cloudflare.com/__down?bytes=0";
 const DL_URL="https://speed.cloudflare.com/__down?bytes=5000000"; // 5 MB
 const samples=[]; // letzte Latenzen (ms)
@@ -716,7 +716,7 @@ async function measurePing(){
   }catch(e){
     measureOK=false;
     document.getElementById("liveLat").textContent="–";
-    document.getElementById("liveNote").textContent="Live-Messung nicht möglich (offline oder vom Browser blockiert).";
+    document.getElementById("liveNote").textContent="Messung nicht möglich (offline oder vom Browser blockiert).";
   }
 }
 
@@ -749,32 +749,27 @@ async function measureUpload(){
   }catch(e){document.getElementById("liveUp").textContent="n. v.";}
 }
 
-measurePing(); measureDownload(); measureUpload();
-setInterval(measurePing, 3000);
-setInterval(measureDownload, 20000);
-setInterval(measureUpload, 25000);
-
-/* ---- Echte Kabel-Zahl live abrufen (mit Reserve auf den festen Wert) ---- */
-(async function liveCables(){
-  const API="https://www.submarinecablemap.com/api/v3/cable/all.json";
-  const LAND="https://www.submarinecablemap.com/api/v3/landing-point/landing-point-geo.json";
-  const proxies=[ u=>"https://corsproxy.io/?url="+encodeURIComponent(u),
-                  u=>"https://api.allorigins.win/raw?url="+encodeURIComponent(u), u=>u ];
-  async function grab(url){
-    for(const p of proxies){
-      try{const r=await fetch(p(url),{cache:"no-store"}); if(!r.ok)continue; return await r.json();}catch(e){}
-    }
-    return null;
+const hinweisMessung=document.getElementById("liveNote").textContent;
+document.getElementById("liveBtn").addEventListener("click",async function(){
+  const knopf=this;
+  knopf.disabled=true; knopf.textContent="Messung läuft …";
+  document.getElementById("liveNote").textContent=hinweisMessung;
+  document.getElementById("liveDown").textContent="messe …";
+  document.getElementById("liveUp").textContent="messe …";
+  measureOK=true;
+  // Acht Durchgänge mit je drei kurzen Abrufen ergeben die Kurve und die Schwankung.
+  for(let i=0;i<8&&measureOK;i++) await measurePing();
+  await measureDownload();
+  await measureUpload();
+  if(measureOK){
+    const zeit=new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
+    document.getElementById("liveNote").textContent="Gemessen um "+zeit+" Uhr gegen das Server-Netz von Cloudflare. Ein Durchlauf, keine Dauermessung.";
+  }else{
+    document.getElementById("liveDown").textContent="—";
+    document.getElementById("liveUp").textContent="—";
   }
-  const cab=await grab(API);
-  if(Array.isArray(cab)&&cab.length>100){
-    document.getElementById("cableCount").textContent=cab.length;
-    const s=document.getElementById("cableStat"); if(s){s.textContent="live ✓"; s.style.color="var(--teal)";}
-  }
-  const lp=await grab(LAND);
-  if(lp&&lp.features&&lp.features.length>100)
-    document.getElementById("landingCount").textContent=lp.features.length.toLocaleString("de-DE");
-})();
+  knopf.disabled=false; knopf.textContent="Erneut messen";
+});
 
 // (Fakten stehen jetzt als Panel in der linken Spalte)
 

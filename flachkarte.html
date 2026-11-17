@@ -134,7 +134,7 @@
   <div class="layers">
     <span class="chip eq on"  id="chip-eq"  onclick="toggleLayer('eq')"><span class="dt"></span>🌋 Erdbeben</span>
     <span class="chip out on" id="chip-out" onclick="toggleLayer('out')"><span class="dt"></span>🔌 Ausfälle</span>
-    <span class="chip bgp"    id="chip-bgp" onclick="toggleLayer('bgp')"><span class="dt"></span>📡 BGP-Live</span>
+    <span class="chip bgp"    id="chip-bgp" onclick="toggleLayer('bgp')" title="Öffnet eine Dauerverbindung zu RIPE NCC in Amsterdam, bis du die Ebene wieder ausschaltest. Dabei erfährt RIPE NCC deine IP-Adresse."><span class="dt"></span>📡 BGP-Live</span>
   </div>
 
   <div class="legend">
@@ -145,7 +145,7 @@
     <span><i style="background:#ffd24a"></i>Ausfall (IODA)</span>
     <span><i style="background:#7fd0ff"></i>BGP-Kollektor (RIPE)</span>
   </div>
-  <div class="hint">💡 Live-Quellen: USGS (Erdbeben) · IODA (Ausfälle) · RIPE RIS (BGP)</div>
+  <div class="hint">💡 Live-Quellen: USGS (Erdbeben) · IODA (Ausfälle) · RIPE RIS (BGP, nur zurückgezogene Routen)</div>
 
   <div class="ginfo" id="ginfo">
     <span class="gx" onclick="closeGinfo()">✕</span>
@@ -366,9 +366,12 @@ let bgpCount=0, bgpWS=null;
 function openBGP(){
   document.getElementById("bgpstat").style.display="";
   try{
-    bgpWS=new WebSocket("wss://ris-live.ripe.net/v1/ws/?client=netzatlas");
-    bgpWS.onopen=()=>{ bgpWS.send(JSON.stringify({type:"ris_subscribe", data:{socketOptions:{includeRaw:false}}})); };
-    bgpWS.onmessage=ev=>{
+    const ws=new WebSocket("wss://ris-live.ripe.net/v1/ws/?client=netzatlas");
+    bgpWS=ws;
+    // Nur Meldungen mit zurückgezogenen Routen: rund ein Dreißigstel des vollen Stroms.
+    ws.onopen=()=>{ ws.send(JSON.stringify({type:"ris_subscribe", data:{require:"withdrawals", socketOptions:{includeRaw:false}}})); };
+    ws.onclose=()=>{ if(bgpWS===ws){ bgpWS=null; if(layers.bgp){ layers.bgp=false; document.getElementById("chip-bgp").classList.remove("on"); document.getElementById("bgpstat").style.display="none"; bgpFlash={}; } } };
+    ws.onmessage=ev=>{
       let m; try{ m=JSON.parse(ev.data); }catch(e){ return; }
       if(!m||m.type!=="ris_message"||!m.data) return;
       const d=m.data, host=(d.host||"").split(".")[0];
@@ -378,7 +381,7 @@ function openBGP(){
       bgpTotal[host]=(bgpTotal[host]||0)+1;
       bgpCount++;
     };
-    bgpWS.onerror=()=>{};
+    ws.onerror=()=>{};
   }catch(e){ document.getElementById("bgpcount").textContent="offline"; }
 }
 function closeBGP(){
@@ -524,6 +527,8 @@ function frame(ts){
 
 /* ---------- Klick → Details (Knoten oder Erdbeben) ---------- */
 const gi=document.getElementById("ginfo"), giB=document.getElementById("ginfo-body");
+// Macht aus fremdem Text harmlosen Text, bevor er als HTML eingesetzt wird.
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function closeGinfo(){ gi.classList.remove("on"); }
 cv.addEventListener("click",e=>{
   const r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
@@ -537,8 +542,8 @@ cv.addEventListener("click",e=>{
 });
 function showOutage(o){
   giB.innerHTML=
-    `<h3>⚠ ${o.name}</h3><div class="gsub">Netz-Auffälligkeit (IODA)</div>`+
-    `<div class="grow"><span class="k">Land-Code</span><span class="v">${o.code||"—"}</span></div>`+
+    `<h3>⚠ ${esc(o.name)}</h3><div class="gsub">Netz-Auffälligkeit (IODA)</div>`+
+    `<div class="grow"><span class="k">Land-Code</span><span class="v">${esc(o.code||"—")}</span></div>`+
     `<div class="grow"><span class="k">Ausfall-Score</span><span class="v">${Math.round(o.score).toLocaleString("de-DE")}</span></div>`+
     `<div class="gnote">IODA erkennt landesweite Netz-Störungen (letzte 24 h) aus Mess-Signalen. Höherer Score = stärker betroffen.</div>`;
   gi.classList.add("on");
@@ -547,8 +552,8 @@ function showRRC(id,rr){
   giB.innerHTML=
     `<h3>${id.toUpperCase()} · ${rr[2]}</h3><div class="gsub">RIPE-RIS-Kollektor (BGP)</div>`+
     `<div class="grow"><span class="k">Standort</span><span class="v">${rr[2]}</span></div>`+
-    `<div class="grow"><span class="k">BGP-Updates</span><span class="v">${(bgpTotal[id]||0).toLocaleString("de-DE")}</span></div>`+
-    `<div class="gnote">Sammelt live die Routing-Ankündigungen des Internets. Blau = neue Route, gelb = Route zurückgezogen.</div>`;
+    `<div class="grow"><span class="k">Rückzüge seit dem Einschalten</span><span class="v">${(bgpTotal[id]||0).toLocaleString("de-DE")}</span></div>`+
+    `<div class="gnote">Sammelt live die Routing-Meldungen des Internets. Die Karte zeigt nur zurückgezogene Routen, damit die Verbindung sparsam bleibt.</div>`;
   gi.classList.add("on");
 }
 function showHub(id,h){
@@ -564,7 +569,7 @@ function showHub(id,h){
 function showQuake(q){
   const when = q.time ? new Date(q.time).toLocaleString("de-DE",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}) : "—";
   giB.innerHTML=
-    `<h3>Erdbeben M ${q.mag.toFixed(1)}</h3><div class="gsub">${q.place}</div>`+
+    `<h3>Erdbeben M ${q.mag.toFixed(1)}</h3><div class="gsub">${esc(q.place)}</div>`+
     `<div class="grow"><span class="k">Stärke</span><span class="v">${q.mag.toFixed(1)}</span></div>`+
     `<div class="grow"><span class="k">Tiefe</span><span class="v">${q.depth!=null?q.depth.toFixed(0)+" km":"—"}</span></div>`+
     `<div class="grow"><span class="k">Zeit</span><span class="v">${when}</span></div>`+
