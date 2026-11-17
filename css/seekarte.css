@@ -1,0 +1,3318 @@
+/* Netz-Atlas · Gestaltung „Seekarte“ · gemeinsame Datei für alle Seiten */
+
+/* ---------- 1. Grundwerte ---------- */
+
+:root {
+  color-scheme: dark;
+  --schwarz: #070b10;
+  --feld: #0c131b;
+  --raster: #14202c;
+  --linie: #263746;
+  --text: #d6dfe7;
+  --matt: #8a9bab;
+  --akzent: #3fd6c6;
+  --bernstein: #ffb000;
+  --gruen: #86f58f;
+  --rot: #ff6b5a;
+  --blau: #7fb4d6;
+  --land: #1b2c3b;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --abstand: 12px;
+  --leiste: 212px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  background: var(--schwarz);
+  color: var(--text);
+  font: 13px/1.5 var(--mono);
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 1px solid var(--text);
+  outline-offset: 2px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* ---------- 2. Grundaufbau: Leiste links, Inhalt rechts ---------- */
+
+.seite {
+  display: grid;
+  grid-template-columns: var(--leiste) minmax(0, 1fr);
+  height: 100dvh;
+}
+
+.rahmen {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: 38px minmax(0, 1fr) auto;
+}
+
+.sprung {
+  position: absolute;
+  left: 8px;
+  top: -60px;
+  z-index: 10;
+  padding: 8px 12px;
+  background: var(--akzent);
+  color: var(--schwarz);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.sprung:focus {
+  top: 8px;
+}
+
+/* ---------- 3. Seitenleiste ---------- */
+
+.leiste {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 22px 0 16px;
+  overflow: auto;
+  background: var(--feld);
+  border-right: 1px solid var(--linie);
+}
+
+.marke {
+  display: block;
+  padding: 0 18px;
+  text-decoration: none;
+}
+
+.marke b {
+  display: block;
+  font-size: 17px;
+  letter-spacing: 1px;
+  color: var(--akzent);
+}
+
+.marke small {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--matt);
+}
+
+.leiste nav {
+  display: grid;
+}
+
+.leiste nav a {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  padding: 8px 18px;
+  border-left: 3px solid transparent;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 1.6px;
+  color: var(--matt);
+}
+
+.leiste nav a b {
+  font-weight: inherit;
+}
+
+.leiste nav a:hover {
+  color: var(--text);
+  background: var(--raster);
+}
+
+/* Der gewählte Bereich: Strich links und getönte Zeile, wie eine markierte Route. */
+.leiste nav a[aria-current] {
+  color: var(--akzent);
+  background: var(--raster);
+  border-left-color: var(--akzent);
+}
+
+.leiste-fuss {
+  margin-top: auto;
+  padding: 12px 18px 0;
+  border-top: 1px solid var(--linie);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--matt);
+}
+
+/* ---------- 4. Kopfzeile ---------- */
+
+.kopf {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--linie);
+  font-size: 11.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.pfad {
+  color: var(--matt);
+  white-space: nowrap;
+}
+
+.pfad b {
+  font-weight: 400;
+  color: var(--akzent);
+}
+
+.uhr {
+  color: var(--matt);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.schalter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.schalter button,
+.umschalter button {
+  padding: 2px 9px;
+  border: 1px solid var(--linie);
+  background: transparent;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--matt);
+  white-space: nowrap;
+}
+
+.schalter button:hover,
+.umschalter button:hover {
+  color: var(--text);
+}
+
+.schalter button[aria-pressed="true"],
+.umschalter button[aria-pressed="true"] {
+  border-color: var(--akzent);
+  color: var(--akzent);
+}
+
+.sprachwahl,
+.umschalter {
+  display: flex;
+}
+
+.sprachwahl {
+  margin-right: 6px;
+}
+
+.sprachwahl button + button,
+.umschalter button + button {
+  border-left: 0;
+}
+
+/* ---------- 5. Inhalt und Titel ---------- */
+
+.inhalt {
+  display: grid;
+  gap: var(--abstand);
+  align-content: start;
+  padding: 16px 20px 26px;
+  overflow: auto;
+}
+
+.inhalt:focus {
+  outline: 0;
+}
+
+.titel {
+  display: grid;
+  gap: 6px;
+  padding: 2px 0 4px;
+}
+
+h1 {
+  margin: 0;
+  font: 700 clamp(21px, 2.4vw, 31px)/1.1 var(--mono);
+  letter-spacing: -0.3px;
+  text-transform: uppercase;
+}
+
+h1 span {
+  color: var(--akzent);
+}
+
+/* Blinkender Unterstrich hinter dem Titel, wie die Eingabemarke eines Messgeräts. */
+.zeiger {
+  display: inline-block;
+  width: 0.6em;
+  height: 0.12em;
+  margin-left: 6px;
+  vertical-align: -0.05em;
+  background: var(--bernstein);
+  animation: blinken 1.1s steps(2) infinite;
+}
+
+.vorspann {
+  max-width: 78ch;
+  margin: 0;
+  color: var(--matt);
+}
+
+.hinweis {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--linie);
+  color: var(--matt);
+}
+
+.stapel {
+  display: grid;
+  gap: var(--abstand);
+}
+
+/* ---------- 6. Tafel: Kasten mit Kopfzeile ---------- */
+
+.tafel {
+  min-width: 0;
+  border: 1px solid var(--linie);
+  background: var(--feld);
+}
+
+.tafel > h2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  height: 28px;
+  margin: 0;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--linie);
+  font-size: 11.5px;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+/* Kleines Quadrat vor dem Titel der Tafel, wie ein Seezeichen. */
+.tafel > h2 > span::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 9px;
+  background: var(--akzent);
+}
+
+.tafel > h2 small {
+  overflow: hidden;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-overflow: ellipsis;
+  color: var(--matt);
+}
+
+.tafel-rumpf {
+  padding: 12px;
+}
+
+/* ---------- 7. Fußzeile ---------- */
+
+.fuss {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 18px;
+  padding: 7px 20px;
+  border-top: 1px solid var(--linie);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--matt);
+}
+
+.fuss nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+
+.fuss a {
+  text-decoration: none;
+}
+
+.fuss a:hover {
+  color: var(--text);
+}
+
+/* ---------- 8. Bewegung ---------- */
+
+@keyframes blinken {
+  50% {
+    opacity: 0;
+  }
+}
+
+.ruhig .zeiger {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zeiger {
+    animation: none;
+  }
+}
+
+/* ---------- 9. Schmale Ansichten ---------- */
+
+@media (max-width: 900px) {
+  :root {
+    --leiste: 54px;
+  }
+
+  .leiste {
+    gap: 16px;
+    padding: 16px 0;
+  }
+
+  .marke {
+    padding: 0 6px;
+    text-align: center;
+  }
+
+  .marke b {
+    font-size: 10px;
+    letter-spacing: 0;
+  }
+
+  .marke small,
+  .leiste-fuss,
+  .leiste nav a b {
+    display: none;
+  }
+
+  .leiste nav a {
+    grid-template-columns: 1fr;
+    padding: 10px 0;
+    text-align: center;
+  }
+
+  .rahmen {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+
+  .kopf {
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    padding: 7px 12px;
+  }
+
+  .uhr {
+    display: none;
+  }
+
+  .inhalt {
+    padding: 14px 12px 24px;
+  }
+
+  .fuss {
+    padding: 7px 12px;
+  }
+}
+
+/* ---------- 10. Bedienteile der Bausteine ---------- */
+
+.reiter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.reiter button {
+  padding: 5px 11px;
+  border: 1px solid var(--linie);
+  background: var(--feld);
+  font-size: 11.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--matt);
+}
+
+.reiter button span {
+  margin-right: 8px;
+  color: var(--akzent);
+}
+
+.reiter button:hover:not(:disabled) {
+  color: var(--text);
+}
+
+.reiter button[aria-pressed="true"] {
+  border-color: var(--akzent);
+  background: var(--raster);
+  color: var(--text);
+}
+
+.reiter button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.schaubild-rumpf {
+  display: grid;
+  gap: 14px;
+  padding: 14px 12px 16px;
+}
+
+.zwei {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.zwei > *,
+.spalte > * {
+  min-width: 0;
+}
+
+.spalte {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.erklaerung h3 {
+  margin: 0 0 4px;
+  font-size: 11.5px;
+  font-weight: 400;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--akzent);
+}
+
+.erklaerung p {
+  max-width: 74ch;
+  margin: 0;
+  color: var(--text);
+}
+
+.erklaerung.grenze {
+  padding: 9px 11px;
+  border-left: 2px solid var(--bernstein);
+  background: var(--raster);
+}
+
+.erklaerung.grenze h3 {
+  color: var(--bernstein);
+}
+
+.vermerk {
+  margin: 0;
+  padding: 6px 10px;
+  border: 1px dashed var(--linie);
+  font-size: 12px;
+  color: var(--matt);
+}
+
+.zahlen {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  border-top: 1px solid var(--linie);
+  border-left: 1px solid var(--linie);
+}
+
+.zahlen > div {
+  min-width: 0;
+  padding: 8px 10px 9px;
+  border-right: 1px solid var(--linie);
+  border-bottom: 1px solid var(--linie);
+}
+
+.zahlen b {
+  display: block;
+  font-size: 18px;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  color: var(--text);
+}
+
+.zahlen span {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--matt);
+}
+
+.zahlen .betont b {
+  color: var(--akzent);
+}
+
+.zahlen .warnung b {
+  color: var(--bernstein);
+}
+
+.regler {
+  display: grid;
+  gap: 4px;
+}
+
+.regler-kopf {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.regler-kopf label {
+  color: var(--matt);
+}
+
+.regler-kopf output {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--akzent);
+}
+
+.regler input[type="range"] {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--akzent);
+}
+
+.eingabe {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.eingabe label {
+  color: var(--matt);
+}
+
+.eingabe select,
+.eingabe input[type="text"],
+.eingabe input[type="search"],
+.eingabe input[type="number"] {
+  width: 100%;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--linie);
+  border-radius: 0;
+  background: var(--schwarz);
+}
+
+.eingabe select:focus,
+.eingabe input:focus {
+  border-color: var(--akzent);
+  outline: 0;
+}
+
+.balken {
+  display: grid;
+  grid-template-columns: minmax(90px, 30%) minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  font-size: 12px;
+}
+
+.balken .name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--matt);
+}
+
+.balken .spur {
+  height: 9px;
+  background: var(--raster);
+}
+
+.balken .spur i {
+  display: block;
+  width: var(--w, 0%);
+  height: 100%;
+  background: var(--f, var(--akzent));
+  transition: width 0.25s ease-out;
+}
+
+.balken b {
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.knopf {
+  padding: 6px 12px;
+  border: 1px solid var(--akzent);
+  background: transparent;
+  font-size: 11.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--akzent);
+}
+
+.knopf:hover:not(:disabled) {
+  background: var(--raster);
+}
+
+.knopf:disabled {
+  border-color: var(--linie);
+  color: var(--matt);
+  cursor: default;
+}
+
+.tabellenhuelle {
+  overflow-x: auto;
+}
+
+.vergleich {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 12px;
+}
+
+.vergleich th,
+.vergleich td {
+  padding: 6px 9px;
+  border-bottom: 1px solid var(--raster);
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.vergleich th {
+  border-bottom-color: var(--linie);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--matt);
+}
+
+.vergleich td.zahl,
+.vergleich th.zahl {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.vergleich tr.gewaehlt td {
+  background: var(--raster);
+}
+
+.vergleich a {
+  color: var(--akzent);
+}
+
+.quellenliste {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+}
+
+.quellenliste li {
+  overflow-wrap: anywhere;
+}
+
+.quellenliste a {
+  color: var(--akzent);
+}
+
+.quellenliste span {
+  color: var(--matt);
+}
+
+.ruhig .balken .spur i {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .balken .spur i {
+    transition: none;
+  }
+}
+
+@media (max-width: 1180px) {
+  .zwei {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- 11. Karte ---------- */
+
+.karte {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.karte-flaeche {
+  position: relative;
+  border: 1px solid var(--linie);
+  background: var(--schwarz);
+}
+
+.karte-flaeche canvas {
+  display: block;
+  width: 100%;
+  touch-action: none;
+}
+
+.karte-flaeche canvas:focus-visible {
+  outline: 1px solid var(--akzent);
+  outline-offset: -1px;
+}
+
+.karte-knoepfe {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  gap: 4px;
+}
+
+.karte-knoepfe button {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--linie);
+  background: var(--feld);
+  line-height: 1;
+  color: var(--text);
+}
+
+.karte-knoepfe button:hover {
+  border-color: var(--akzent);
+  color: var(--akzent);
+}
+
+.karte-tipp {
+  position: absolute;
+  z-index: 2;
+  max-width: 180px;
+  padding: 3px 7px;
+  border: 1px solid var(--linie);
+  background: var(--feld);
+  font-size: 11.5px;
+  pointer-events: none;
+}
+
+.karte-tipp span {
+  color: var(--matt);
+}
+
+.karte-tipp b {
+  font-weight: 400;
+}
+
+.karte-legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--matt);
+}
+
+.karte-legende span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.karte-legende i {
+  display: inline-block;
+  width: 18px;
+  height: 0;
+  border-top: 2px solid var(--akzent);
+}
+
+.karte-legende .geplant i {
+  border-top-style: dashed;
+}
+
+.karte-legende .stillgelegt i {
+  border-top: 2px dotted var(--matt);
+}
+
+.karte-legende .ort i {
+  width: 6px;
+  height: 6px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--text);
+}
+
+.karte-legende .knoten i {
+  width: 7px;
+  height: 7px;
+  border: 0;
+  background: var(--bernstein);
+}
+
+.karte-legende .marke i {
+  width: 8px;
+  height: 8px;
+  border: 0;
+  background: var(--f, var(--bernstein));
+}
+
+.karte-legende .marke.raute i {
+  transform: rotate(45deg);
+}
+
+.karte-legende .marke.ring i {
+  border: 1.5px solid var(--f, var(--bernstein));
+  border-radius: 50%;
+  background: transparent;
+}
+
+.karte-legende .marke.kreis i {
+  border-radius: 50%;
+}
+
+.karte-legende em {
+  margin-left: auto;
+  font-style: normal;
+  color: var(--bernstein);
+}
+
+.karte-bedienung {
+  margin: 0;
+  font-size: 11px;
+  color: var(--matt);
+}
+
+/* ---------- 12. Verzeichnis und Profil ---------- */
+
+.zweispalter {
+  display: grid;
+  grid-template-columns: minmax(230px, 300px) minmax(0, 1fr);
+  gap: var(--abstand);
+  align-items: start;
+}
+
+.verz-suche {
+  padding: 10px 12px 0;
+}
+
+.verzeichnis {
+  max-height: 72vh;
+  padding: 6px 0 10px;
+  overflow: auto;
+}
+
+.verz-gruppe {
+  margin: 10px 12px 4px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--matt);
+}
+
+.verz-liste {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.verz-eintrag {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 5px 12px;
+  border: 0;
+  border-left: 3px solid transparent;
+  background: transparent;
+  text-align: left;
+}
+
+.verz-eintrag b {
+  overflow: hidden;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.verz-eintrag small {
+  font-size: 11.5px;
+  white-space: nowrap;
+  color: var(--matt);
+}
+
+.verz-eintrag:hover {
+  background: var(--raster);
+}
+
+.verz-eintrag[aria-pressed="true"] {
+  border-left-color: var(--akzent);
+  background: var(--raster);
+  color: var(--akzent);
+}
+
+.verz-eintrag.stillgelegt b {
+  color: var(--matt);
+}
+
+.verz-leer {
+  margin: 12px;
+  color: var(--matt);
+}
+
+.profil {
+  display: grid;
+  gap: 12px;
+  padding: 14px 12px 16px;
+}
+
+.profil-kopf {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px 12px;
+}
+
+.profil-kopf h3 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.2;
+  letter-spacing: 0.5px;
+}
+
+.profil-status {
+  padding: 1px 8px;
+  border: 1px solid currentColor;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--matt);
+}
+
+.profil-status.betrieb {
+  color: var(--gruen);
+}
+
+.profil-status.geplant {
+  color: var(--bernstein);
+}
+
+.profil-text {
+  max-width: 80ch;
+  margin: 0;
+}
+
+.profil-angaben {
+  display: grid;
+  grid-template-columns: fit-content(42%) minmax(0, 1fr);
+  gap: 3px 16px;
+  margin: 0;
+  font-size: 12px;
+}
+
+.profil-angaben dt {
+  color: var(--matt);
+}
+
+.profil-angaben dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.profil-abschnitt h4 {
+  margin: 0 0 6px;
+  font-size: 11.5px;
+  font-weight: 400;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--akzent);
+}
+
+.profil-notiz {
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  color: var(--matt);
+}
+
+.profil-offen {
+  margin: 0;
+  padding: 6px 10px;
+  border-left: 2px solid var(--bernstein);
+  background: var(--raster);
+  font-size: 12px;
+}
+
+.profil .knopf {
+  justify-self: start;
+  text-decoration: none;
+}
+
+.vergleich.orte,
+.vergleich.schmal {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .zweispalter {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .verzeichnis {
+    max-height: 240px;
+  }
+}
+
+/* ---------- 13. Atlas, Globus und Auskunft ---------- */
+
+.zweispalter.innen {
+  grid-template-columns: minmax(200px, 260px) minmax(0, 1fr);
+}
+
+.verz-zahl {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--matt);
+}
+
+.atlas-leiste {
+  display: grid;
+  grid-template-columns: minmax(200px, 2fr) minmax(170px, 1fr) auto auto;
+  gap: 10px 14px;
+  align-items: end;
+}
+
+.atlas-seite {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 28%, 420px);
+  gap: 14px;
+  align-items: start;
+}
+
+/* Karte und Liste links untereinander, Auskunft rechts über beide Zeilen. */
+@media (min-width: 1181px) {
+  .atlas-seite.geteilt {
+    grid-template-rows: auto 1fr;
+  }
+
+  .atlas-seite.geteilt > :nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .atlas-seite.geteilt > :nth-child(2) {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .atlas-seite.geteilt > :nth-child(3) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}
+
+.atlas-treffer:empty {
+  display: none;
+}
+
+.atlas-knoepfe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.atlas-knoepfe button {
+  padding: 2px 8px;
+  border: 1px solid var(--linie);
+  background: transparent;
+  font-size: 11.5px;
+  color: var(--matt);
+}
+
+.atlas-knoepfe button b {
+  font-weight: 400;
+  color: var(--text);
+}
+
+.atlas-knoepfe button:hover {
+  border-color: var(--matt);
+  color: var(--text);
+}
+
+.atlas-knoepfe button[aria-pressed="true"] {
+  border-color: var(--bernstein);
+  color: var(--bernstein);
+}
+
+.atlas-liste h3 {
+  margin: 0 0 6px;
+  font-size: 11.5px;
+  font-weight: 400;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--akzent);
+}
+
+.auskunft {
+  display: grid;
+  container-type: inline-size;
+  gap: 10px;
+  padding: 11px 12px 12px;
+  border: 1px solid var(--linie);
+  background: var(--schwarz);
+}
+
+/* In einer schmalen Auskunft steht der Name über dem Wert statt daneben. */
+@container (max-width: 330px) {
+  .profil-angaben {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .profil-angaben dd {
+    margin-bottom: 6px;
+  }
+}
+
+.auskunft .profil-kopf h3 {
+  font-size: 16px;
+}
+
+.auskunft .knopf {
+  justify-self: start;
+  text-decoration: none;
+}
+
+.auskunft-leer {
+  margin: 0;
+  color: var(--matt);
+}
+
+.auskunft-liste {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+}
+
+.auskunft-liste a {
+  color: var(--akzent);
+}
+
+.globus {
+  position: relative;
+  height: clamp(380px, 62vh, 680px);
+  border: 1px solid var(--linie);
+  background: var(--schwarz);
+  overflow: hidden;
+}
+
+.globus-meldung {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 20px;
+  text-align: center;
+  color: var(--matt);
+}
+
+@media (max-width: 1180px) {
+  .atlas-leiste {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .atlas-seite {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .zweispalter.innen {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .atlas-leiste {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- 14. Störfälle: Zeitachse und Liste ---------- */
+
+.zeitkarte-huelle {
+  overflow-x: auto;
+  border: 1px solid var(--linie);
+  background: var(--schwarz);
+}
+
+.zeitkarte {
+  display: block;
+  width: 100%;
+  min-width: 760px;
+  height: auto;
+  padding: 4px 10px 2px;
+}
+
+.zeit-raster {
+  stroke: var(--raster);
+  stroke-width: 1;
+}
+
+.zeit-linie {
+  stroke: var(--linie);
+  stroke-width: 1;
+}
+
+.zeit-jahr,
+.zeit-zeile {
+  font: 11px var(--mono);
+  fill: var(--matt);
+}
+
+.zeit-jahr {
+  text-anchor: middle;
+}
+
+.zeit-marke {
+  cursor: pointer;
+  stroke-width: 1.5;
+}
+
+.zeit-marke.kabel {
+  fill: var(--akzent);
+  stroke: var(--akzent);
+}
+
+.zeit-marke.routing {
+  fill: var(--bernstein);
+  stroke: var(--bernstein);
+}
+
+.zeit-marke.offen {
+  fill: var(--schwarz);
+}
+
+.zeit-marke.gewaehlt {
+  stroke: var(--text);
+  stroke-width: 2.5;
+}
+
+.zeit-marke:focus-visible {
+  outline: 1px solid var(--text);
+  outline-offset: 3px;
+}
+
+.tabellenknopf {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  color: var(--akzent);
+}
+
+.tabellenknopf:hover {
+  text-decoration: underline;
+}
+
+.vergleich.faelle th:nth-child(1),
+.vergleich.faelle td:nth-child(1) {
+  width: 96px;
+  white-space: nowrap;
+}
+
+.vergleich.faelle th:nth-child(3),
+.vergleich.faelle td:nth-child(3) {
+  width: 150px;
+}
+
+.vergleich.faelle th:nth-child(4),
+.vergleich.faelle td:nth-child(4) {
+  width: 30%;
+}
+
+/* ---------- 15. Startseite ---------- */
+
+.werkzeugzeile {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.befehl {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(460px, 100%);
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--linie);
+  background: var(--feld);
+}
+
+.befehl:focus-within {
+  border-color: var(--akzent);
+}
+
+.befehl span {
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--akzent);
+}
+
+.befehl input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+}
+
+.befehl input::placeholder {
+  color: var(--matt);
+}
+
+.befehl kbd {
+  padding: 0 6px;
+  border: 1px solid var(--linie);
+  font: inherit;
+  font-size: 11px;
+  color: var(--matt);
+}
+
+.standzeile {
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--matt);
+}
+
+.standzeile b {
+  font-weight: 400;
+  color: var(--gruen);
+}
+
+/* Meldungsband: die jüngsten Störfälle als laufende Zeile. Ohne Bewegung steht die Zeile und rollt von Hand. */
+.band {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  height: 30px;
+  border: 1px solid var(--linie);
+  background: var(--feld);
+  font-size: 11.5px;
+  line-height: 28px;
+}
+
+.band-kopf,
+.band-alle {
+  flex: 0 0 auto;
+  padding: 0 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--akzent);
+}
+
+.band-kopf {
+  border-right: 1px solid var(--linie);
+}
+
+.band-alle {
+  border-left: 1px solid var(--linie);
+}
+
+.band-fenster {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.band-lauf {
+  display: flex;
+  width: max-content;
+  animation: bandlauf var(--dauer, 60s) linear infinite;
+}
+
+.band:hover .band-lauf,
+.band:focus-within .band-lauf {
+  animation-play-state: paused;
+}
+
+.band-meldung {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 18px;
+  border-right: 1px solid var(--raster);
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.band-meldung:hover span {
+  color: var(--akzent);
+}
+
+.band-meldung time {
+  font-variant-numeric: tabular-nums;
+  color: var(--matt);
+}
+
+.band-meldung i {
+  width: 7px;
+  height: 7px;
+  background: var(--f);
+}
+
+@keyframes bandlauf {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.startreihe {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+  gap: var(--abstand);
+  align-items: start;
+}
+
+.spalte.eng {
+  gap: 6px;
+}
+
+h4.klein {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--matt);
+}
+
+.tafel .zahlen {
+  border-top: 0;
+  border-left: 0;
+}
+
+.atlas-knoepfe a {
+  padding: 2px 8px;
+  border: 1px solid var(--linie);
+  font-size: 11.5px;
+  text-decoration: none;
+  color: var(--matt);
+}
+
+.atlas-knoepfe a b {
+  font-weight: 400;
+  color: var(--text);
+}
+
+.atlas-knoepfe a:hover {
+  border-color: var(--matt);
+}
+
+.ruhig .band-fenster {
+  overflow-x: auto;
+}
+
+.ruhig .band-lauf {
+  animation: none;
+}
+
+.ruhig .band-doppel {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .band-fenster {
+    overflow-x: auto;
+  }
+
+  .band-lauf {
+    animation: none;
+  }
+
+  .band-doppel {
+    display: none;
+  }
+}
+
+@media (max-width: 1180px) {
+  .startreihe {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .band-alle {
+    display: none;
+  }
+}
+
+/* ---------- 16. Live-Seite ---------- */
+
+.live-koepfe {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.live-kopf {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  padding: 10px 12px 12px;
+  border: 1px solid var(--linie);
+  background: var(--schwarz);
+}
+
+.live-kopf h3,
+.live-listen h3 {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 400;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--akzent);
+}
+
+.live-kopf p {
+  margin: 0;
+}
+
+.live-kopf .knopf,
+.spalte > .knopf {
+  justify-self: start;
+}
+
+.live-hinweis {
+  margin: 0;
+  padding-left: 9px;
+  border-left: 2px solid var(--bernstein);
+  font-size: 12px;
+  color: var(--matt);
+}
+
+.live-zustand {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--matt);
+}
+
+.live-listen {
+  display: grid;
+  gap: 8px;
+}
+
+.live-listen:empty {
+  display: none;
+}
+
+.live-saeulen {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 46px;
+  padding: 4px 6px;
+  border: 1px solid var(--linie);
+  background: var(--schwarz);
+}
+
+.live-saeulen i {
+  flex: 1;
+  height: var(--h, 10%);
+  background: var(--akzent);
+}
+
+.schaubild-rumpf > * {
+  min-width: 0;
+}
+
+@media (max-width: 1180px) {
+  .live-koepfe {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- 17. Datenschutzseite ---------- */
+
+.rechtstext {
+  gap: 10px;
+}
+
+.rechtstext p,
+.rechtstext ul {
+  max-width: 86ch;
+  margin: 0;
+}
+
+.rechtstext ul:not(.quellenliste) {
+  display: grid;
+  gap: 4px;
+  padding-left: 20px;
+}
+
+.rechtstext h3 {
+  margin: 12px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--linie);
+  font-size: 12.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--akzent);
+}
+
+.rechtstext h3:focus {
+  outline: 0;
+}
+
+.rechtskurz {
+  padding: 9px 11px;
+  border-left: 2px solid var(--akzent);
+  background: var(--raster);
+}
+
+.rechtsinhalt {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.rechtsinhalt button {
+  padding: 2px 9px;
+  border: 1px solid var(--linie);
+  background: transparent;
+  font-size: 11.5px;
+  color: var(--matt);
+}
+
+.rechtsinhalt button:hover {
+  border-color: var(--akzent);
+  color: var(--text);
+}
+
+.listentitel {
+  color: var(--matt);
+}
+
+/* ---------- 18. Technik: Bausteine ---------- */
+
+/* Baustein „Laufzeit“ */
+
+.lz-orte {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.lz-schalter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+/* Die Laufzeit als große Zahl, wie die Hauptanzeige eines Messgeräts. */
+.lz-gross {
+  padding: 9px 12px 10px;
+  border: 1px solid var(--linie);
+  border-left: 2px solid var(--akzent);
+  background: var(--raster);
+}
+
+.lz-gross b {
+  font-size: clamp(34px, 4.4vw, 52px);
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  color: var(--akzent);
+}
+
+.lz-gross span {
+  margin-left: 8px;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.lz-gross small {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--matt);
+}
+
+.lz-bild {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  border: 1px solid var(--linie);
+  background: var(--schwarz);
+}
+
+.lz-bild text {
+  font-size: 12px;
+  fill: var(--matt);
+}
+
+.lz-bild .lz-luft {
+  stroke: var(--akzent);
+  stroke-width: 2;
+}
+
+.lz-bild .lz-kabel {
+  fill: none;
+  stroke: var(--bernstein);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.lz-bild .lz-ort {
+  fill: var(--text);
+}
+
+.lz-bild .lz-luft-text {
+  fill: var(--akzent);
+}
+
+.lz-bild .lz-kabel-text {
+  fill: var(--bernstein);
+}
+
+.lz-abschnitt {
+  display: grid;
+  gap: 6px;
+}
+
+.lz-abschnitt > * {
+  min-width: 0;
+}
+
+.vergleich.lz-tabelle {
+  min-width: 0;
+}
+
+.lz-tabelle th:last-child,
+.lz-tabelle td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.lz-regeln th:first-child {
+  width: 44%;
+}
+
+.lz-messung th:first-child {
+  width: 62%;
+}
+
+/* Baustein „Seekabel“ */
+
+.sk-teile {
+  flex-wrap: wrap;
+  row-gap: 4px;
+}
+
+.sk-bild {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--linie);
+  background: var(--schwarz);
+}
+
+.sk-bild text {
+  font: 11.5px var(--mono);
+  fill: var(--matt);
+}
+
+.sk-bild .sk-nummer,
+.sk-bild .sk-mass {
+  font-size: 12px;
+  fill: var(--text);
+}
+
+/* Tiefenprofil: Wasser, Grund, eingegrabener und aufliegender Abschnitt des Kabels. */
+.sk-wasser {
+  fill: var(--raster);
+}
+
+.sk-grund {
+  fill: var(--land);
+}
+
+.sk-strich,
+.sk-masslinie {
+  stroke: var(--matt);
+  stroke-width: 1;
+}
+
+.sk-grenzlinie {
+  stroke: var(--bernstein);
+  stroke-width: 1;
+  stroke-dasharray: 1 4;
+}
+
+.sk-graben,
+.sk-lage {
+  fill: none;
+  stroke-width: 2.5;
+}
+
+.sk-graben {
+  stroke: var(--bernstein);
+  stroke-dasharray: 5 3;
+}
+
+.sk-lage {
+  stroke: var(--akzent);
+}
+
+.sk-fuehrung {
+  stroke: var(--text);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+
+.sk-marke {
+  fill: var(--text);
+  stroke: var(--schwarz);
+  stroke-width: 1.5;
+}
+
+/* Schichten des Kabels: dieselbe Klasse färbt die Fläche im Bild und das Kästchen in der Liste. */
+.sk-f-faser {
+  fill: var(--akzent);
+  background: var(--akzent);
+}
+
+.sk-f-faserbett {
+  fill: var(--schwarz);
+  stroke: var(--akzent);
+  stroke-width: 0.75;
+}
+
+.sk-f-kern {
+  fill: var(--blau);
+  background: var(--blau);
+}
+
+.sk-f-mantel {
+  fill: var(--land);
+  stroke: var(--matt);
+  stroke-width: 0.75;
+  background: var(--land);
+}
+
+.sk-f-kupfer {
+  fill: var(--bernstein);
+  background: var(--bernstein);
+}
+
+.sk-f-stahlbett {
+  fill: var(--schwarz);
+  stroke: var(--matt);
+  stroke-width: 0.75;
+}
+
+.sk-f-stahl {
+  fill: var(--matt);
+  background: var(--matt);
+}
+
+.sk-f-garn {
+  fill: var(--linie);
+  stroke: var(--matt);
+  stroke-width: 0.75;
+  background: var(--linie);
+}
+
+.sk-zeiger {
+  stroke: var(--text);
+  stroke-width: 0.75;
+}
+
+.sk-zeigerpunkt {
+  fill: var(--text);
+  stroke: var(--schwarz);
+  stroke-width: 0.75;
+}
+
+.sk-legende {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+}
+
+.sk-legende li {
+  display: grid;
+  grid-template-columns: 12px 16px minmax(0, 1fr);
+  gap: 8px;
+  align-items: baseline;
+}
+
+.sk-legende i {
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--matt);
+  align-self: center;
+}
+
+.sk-legende b {
+  font-weight: 400;
+  text-align: right;
+  color: var(--akzent);
+}
+
+/* Kennzahlen mit Worten und Einheiten: breitere Felder, der Wert darf umbrechen. */
+.zahlen.sk-breit {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.zahlen.sk-breit b {
+  overflow: visible;
+  font-size: 15px;
+  line-height: 1.3;
+  white-space: normal;
+}
+
+/* Verstärkerkette */
+.sk-kabel {
+  fill: none;
+  stroke: var(--matt);
+  stroke-width: 1;
+}
+
+.sk-verstaerker {
+  fill: var(--akzent);
+}
+
+.sk-station {
+  fill: var(--bernstein);
+}
+
+/* Kapazitätsrechner */
+.sk-vorwahl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sk-paar {
+  fill: var(--akzent);
+  stroke: var(--akzent);
+  stroke-width: 1;
+}
+
+.sk-paar.sk-leer {
+  fill: none;
+  stroke: var(--linie);
+}
+
+.sk-balken {
+  display: grid;
+  gap: 6px;
+}
+
+/* Schäden und Reparatur */
+.sk-phasen {
+  display: grid;
+  gap: 8px;
+}
+
+.sk-phase {
+  display: grid;
+  gap: 3px;
+  font-size: 12px;
+}
+
+.sk-phase-kopf {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 12px;
+}
+
+.sk-phase-kopf span {
+  color: var(--matt);
+}
+
+.sk-phase-kopf b {
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.sk-spur {
+  height: 9px;
+  background: var(--raster);
+}
+
+.sk-spur.sk-offen {
+  border: 1px dashed var(--matt);
+  background: transparent;
+}
+
+.sk-spur i {
+  display: block;
+  width: var(--w, 0%);
+  height: 100%;
+  margin-left: var(--l, 0%);
+  background: var(--akzent);
+}
+
+.vergleich.sk-schmal {
+  min-width: 0;
+}
+
+.vergleich.sk-schmal th:first-child {
+  width: 36%;
+}
+
+/* Baustein „Paketweg“ */
+
+.pw-knoepfe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pw-knoepfe .knopf[aria-pressed="true"] {
+  background: var(--raster);
+}
+
+/* Stationenkette: wird vom Skript in der Breite des Platzes gezeichnet. */
+.pw-bild svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.pw-bild text {
+  fill: var(--matt);
+}
+
+.pw-kasten {
+  fill: var(--feld);
+  stroke: var(--linie);
+  stroke-width: 1;
+}
+
+.pw-nummer {
+  font-weight: 700;
+}
+
+.pw-strang {
+  stroke: var(--linie);
+  stroke-width: 2;
+}
+
+.pw-strang.pw-vorbei {
+  stroke: var(--akzent);
+}
+
+.pw-welle {
+  fill: none;
+  stroke: var(--blau);
+  stroke-width: 1.2;
+}
+
+.pw-station.pw-vorbei .pw-kasten {
+  fill: var(--raster);
+  stroke: var(--akzent);
+}
+
+.pw-station.pw-vorbei .pw-nummer {
+  fill: var(--akzent);
+}
+
+.pw-station.pw-vorbei .pw-name,
+.pw-station.pw-jetzt .pw-name {
+  fill: var(--text);
+}
+
+.pw-station.pw-jetzt .pw-kasten {
+  fill: var(--raster);
+  stroke: var(--bernstein);
+  stroke-width: 2;
+  animation: pw-puls 1.2s ease-in-out infinite;
+}
+
+.pw-station.pw-jetzt .pw-nummer {
+  fill: var(--bernstein);
+}
+
+.pw-rueck {
+  fill: none;
+  stroke: var(--linie);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+.pw-spitze {
+  fill: var(--linie);
+}
+
+.pw-rueckweg.pw-jetzt .pw-rueck {
+  stroke: var(--bernstein);
+}
+
+.pw-rueckweg.pw-jetzt .pw-spitze {
+  fill: var(--bernstein);
+}
+
+.pw-bild .pw-rueckweg.pw-jetzt .pw-rueck-text {
+  fill: var(--bernstein);
+}
+
+/* Beschreibung des aktuellen Schritts. */
+.pw-schritt {
+  padding: 9px 11px;
+  border: 1px solid var(--linie);
+  background: var(--schwarz);
+}
+
+.pw-schritt b {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--bernstein);
+}
+
+.pw-schritt p {
+  margin: 3px 0 0;
+}
+
+.pw-schritt small {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--matt);
+}
+
+/* Liste der Abschnitte: Balken aus Abschnitt 11, hier mit zweizeiligem Namen und Markierung. */
+.pw-abschnitte {
+  display: grid;
+  gap: 4px;
+}
+
+.pw-abschnitte .balken {
+  grid-template-columns: minmax(96px, 36%) minmax(0, 1fr) auto;
+  padding: 3px 6px;
+  border-left: 2px solid transparent;
+}
+
+.pw-abschnitte .balken .name {
+  white-space: normal;
+}
+
+.pw-abschnitte .balken .name small {
+  display: block;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.pw-abschnitte .balken.pw-vorbei .name {
+  color: var(--text);
+}
+
+.pw-abschnitte .balken.pw-jetzt {
+  border-left-color: var(--bernstein);
+  background: var(--raster);
+}
+
+.pw-abschnitte .balken.pw-jetzt .name {
+  color: var(--bernstein);
+}
+
+/* Nachgestellte Traceroute-Ausgabe. */
+.pw-ausgabe {
+  padding: 9px 11px;
+  border: 1px solid var(--linie);
+  background: var(--schwarz);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.pw-befehl {
+  margin-bottom: 2px;
+  overflow-wrap: anywhere;
+  color: var(--matt);
+}
+
+.pw-zeile {
+  display: grid;
+  grid-template-columns: 2ch minmax(0, 1fr) auto;
+  column-gap: 1ch;
+}
+
+.pw-zeile > * {
+  min-width: 0;
+}
+
+.pw-nr {
+  text-align: right;
+  color: var(--matt);
+}
+
+.pw-mitte {
+  overflow-wrap: anywhere;
+}
+
+.pw-wert {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.pw-zeile.pw-unsichtbar,
+.pw-zeile.pw-unsichtbar .pw-nr {
+  color: var(--bernstein);
+}
+
+.pw-zeile.pw-jetzt {
+  background: var(--raster);
+}
+
+@keyframes pw-puls {
+  50% {
+    stroke-opacity: 0.35;
+  }
+}
+
+.ruhig .pw-station.pw-jetzt .pw-kasten {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pw-station.pw-jetzt .pw-kasten {
+    animation: none;
+  }
+}
+
+/* Baustein „Namensauflösung“ */
+
+.dns-knoepfe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dns-beschriftung {
+  color: var(--matt);
+}
+
+/* Ablaufzeichnung: wird vom Skript in der Breite des Platzes gezeichnet. */
+.dns-bild svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.dns-linie {
+  stroke: var(--linie);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+.dns-marke {
+  fill: var(--matt);
+}
+
+.dns-name {
+  fill: var(--text);
+}
+
+.dns-speicher {
+  fill: var(--matt);
+}
+
+.dns-speicher.dns-gemerkt {
+  fill: var(--bernstein);
+}
+
+.dns-kopf.dns-ruht {
+  opacity: 0.4;
+}
+
+.dns-pfeil line {
+  stroke-width: 1.5;
+}
+
+.dns-pfeil text {
+  paint-order: stroke;
+  stroke: var(--feld);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.dns-anfrage line {
+  stroke: var(--akzent);
+}
+
+.dns-anfrage path,
+.dns-anfrage circle,
+.dns-anfrage text {
+  fill: var(--akzent);
+}
+
+.dns-verweis line {
+  stroke: var(--bernstein);
+  stroke-dasharray: 5 3;
+}
+
+.dns-verweis path,
+.dns-verweis circle,
+.dns-verweis text {
+  fill: var(--bernstein);
+}
+
+.dns-antwort line {
+  stroke: var(--gruen);
+}
+
+.dns-antwort path,
+.dns-antwort circle,
+.dns-antwort text {
+  fill: var(--gruen);
+}
+
+.dns-pfeil.dns-frueher {
+  opacity: 0.55;
+}
+
+.dns-pfeil.dns-jetzt line {
+  stroke-width: 2.5;
+}
+
+.dns-pfeil.dns-jetzt text {
+  font-weight: 700;
+}
+
+.dns-pfeil.dns-jetzt {
+  animation: dns-auftauchen 0.3s ease-out both;
+}
+
+/* Beschreibung des aktuellen Schritts. */
+.dns-schritt {
+  padding: 9px 11px;
+  border: 1px solid var(--linie);
+  background: var(--schwarz);
+}
+
+.dns-schritt b {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--bernstein);
+}
+
+.dns-schritt p {
+  margin: 3px 0 0;
+  overflow-wrap: anywhere;
+}
+
+/* Zweite Tafel: Root-Server in Zahlen. */
+.dns-root {
+  display: grid;
+  gap: 10px;
+}
+
+.dns-root > * {
+  min-width: 0;
+}
+
+@keyframes dns-auftauchen {
+  from {
+    opacity: 0;
+  }
+}
+
+.ruhig .dns-pfeil.dns-jetzt {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dns-pfeil.dns-jetzt {
+    animation: none;
+  }
+}
+
+/* Baustein „Routing“ */
+
+.bgp-teil {
+  min-width: 0;
+}
+
+/* Knopfreihen, die bei schmaler Breite umbrechen dürfen. */
+.bgp-wahl {
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.bgp-wahl button + button {
+  border-left: 1px solid var(--linie);
+}
+
+.bgp-feld {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.bgp-feld > span {
+  color: var(--matt);
+}
+
+.bgp-bedienung {
+  display: grid;
+  gap: 10px;
+}
+
+.bgp-bedienung p {
+  max-width: 74ch;
+  margin: 0;
+  color: var(--matt);
+}
+
+.bgp-anzeige {
+  display: grid;
+  gap: 10px;
+}
+
+/* Die Zeichnung des Beispielnetzes. */
+.bgp-bild {
+  display: block;
+  width: 100%;
+  max-width: 640px;
+  height: auto;
+  margin: 0 auto;
+  font-family: var(--mono);
+}
+
+.bgp-leitung {
+  stroke: var(--matt);
+  stroke-width: 1.2;
+  stroke-opacity: 0.6;
+}
+
+.bgp-leitung.aus {
+  stroke: var(--bernstein);
+  stroke-opacity: 1;
+  stroke-dasharray: 2 5;
+}
+
+.bgp-kreuz {
+  stroke: var(--bernstein);
+  stroke-width: 2;
+}
+
+.bgp-weg {
+  fill: none;
+  stroke: var(--akzent);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-dasharray: 7 5;
+  animation: bgp-fluss 0.8s linear infinite;
+}
+
+.bgp-bild.irrweg .bgp-weg {
+  stroke: var(--rot);
+}
+
+.bgp-netz rect {
+  fill: var(--feld);
+  stroke: var(--matt);
+  stroke-width: 1;
+}
+
+.bgp-netz.weg rect {
+  fill: var(--raster);
+  stroke: var(--akzent);
+  stroke-width: 1.6;
+}
+
+.bgp-bild.irrweg .bgp-netz.weg rect,
+.bgp-netz.falsch rect {
+  stroke: var(--rot);
+}
+
+.bgp-netz text {
+  fill: var(--text);
+  font-size: 11px;
+  text-anchor: middle;
+}
+
+.bgp-netz text.nummer {
+  fill: var(--matt);
+  font-size: 9px;
+}
+
+.bgp-rolle {
+  fill: var(--matt);
+  font-size: 9.5px;
+  letter-spacing: 0.5px;
+  text-anchor: middle;
+}
+
+.bgp-block {
+  fill: var(--akzent);
+  font-size: 9.5px;
+  text-anchor: middle;
+}
+
+.bgp-rolle.falsch,
+.bgp-block.falsch {
+  fill: var(--rot);
+}
+
+.bgp-rolle.rechts,
+.bgp-block.rechts {
+  text-anchor: end;
+}
+
+/* Erklärung der Linien unter der Zeichnung. */
+.bgp-legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 11.5px;
+  color: var(--matt);
+}
+
+.bgp-legende span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.bgp-legende i {
+  width: 22px;
+  border-top: 3px dashed var(--akzent);
+}
+
+.bgp-legende i.irrweg {
+  border-top-color: var(--rot);
+}
+
+.bgp-legende i.aus {
+  border-top: 2px dotted var(--bernstein);
+}
+
+/* Ergebnis in Worten: Zieladresse, Weg, Regel und Folge. */
+.bgp-ergebnis {
+  display: grid;
+  grid-template-columns: fit-content(42%) minmax(0, 1fr);
+  gap: 6px 14px;
+  margin: 0;
+  font-size: 12.5px;
+}
+
+.bgp-ergebnis dt {
+  color: var(--matt);
+}
+
+.bgp-ergebnis dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.bgp-ergebnis dd b {
+  display: block;
+  font-weight: 400;
+  color: var(--akzent);
+}
+
+.bgp-ergebnis dd b.warnung {
+  color: var(--rot);
+}
+
+.bgp-ergebnis dd span {
+  color: var(--matt);
+}
+
+/* Liste der Ankündigungen, die das Startnetz kennt. */
+.bgp-eintraege {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+}
+
+.bgp-eintraege li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  padding: 5px 10px;
+  border-left: 2px solid var(--linie);
+  background: var(--raster);
+  color: var(--matt);
+}
+
+.bgp-eintraege b {
+  font-weight: 400;
+  color: var(--text);
+}
+
+.bgp-eintraege em {
+  margin-left: auto;
+  font-style: normal;
+}
+
+.bgp-eintraege li.gewaehlt {
+  border-left-color: var(--akzent);
+}
+
+.bgp-eintraege li.gewaehlt em {
+  color: var(--akzent);
+}
+
+.bgp-eintraege li.gewaehlt.falsch {
+  border-left-color: var(--rot);
+}
+
+.bgp-eintraege li.gewaehlt.falsch em {
+  color: var(--rot);
+}
+
+/* Tabelle der Vorfälle: schmale Spalten für Datum und Quelle. */
+.bgp-vorfaelle th:first-child {
+  width: 104px;
+}
+
+.bgp-vorfaelle th:last-child {
+  width: 176px;
+}
+
+@keyframes bgp-fluss {
+  from {
+    stroke-dashoffset: 12;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.ruhig .bgp-weg {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bgp-weg {
+    animation: none;
+  }
+}
+
+/* Baustein „Austauschpunkt“ */
+
+.aus-teil {
+  min-width: 0;
+}
+
+/* Knopfreihe, die bei schmaler Breite umbrechen darf. */
+.aus-wahl {
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.aus-wahl button + button {
+  border-left: 1px solid var(--linie);
+}
+
+.aus-feld {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.aus-feld > span {
+  color: var(--matt);
+}
+
+/* Die zwei Auswahlfelder für den örtlichen Verkehr stehen nebeneinander. */
+.aus-paar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+
+.aus-anzeige {
+  display: grid;
+  gap: 10px;
+}
+
+/* Die Zeichnung: Netze im Kreis, Leitungen und der Weg des gewählten Verkehrs. */
+.aus-bild {
+  display: block;
+  width: 100%;
+  max-width: 470px;
+  height: auto;
+  margin: 0 auto;
+  font-family: var(--mono);
+}
+
+.aus-leitung {
+  stroke: var(--matt);
+  stroke-width: 1;
+  stroke-opacity: 0.55;
+}
+
+.aus-weg {
+  fill: none;
+  stroke: var(--akzent);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-dasharray: 7 5;
+  animation: aus-fluss 0.8s linear infinite;
+}
+
+.aus-netz circle {
+  fill: var(--feld);
+  stroke: var(--matt);
+  stroke-width: 1;
+}
+
+.aus-netz.gewaehlt circle {
+  fill: var(--raster);
+  stroke: var(--akzent);
+  stroke-width: 1.6;
+}
+
+.aus-netz text,
+.aus-knotenname {
+  fill: var(--text);
+  font-size: 12px;
+  text-anchor: middle;
+}
+
+.aus-knoten {
+  fill: var(--raster);
+  stroke: var(--bernstein);
+  stroke-width: 1.4;
+}
+
+.aus-knotenname {
+  fill: var(--bernstein);
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+/* Ergebnis in Worten: Rechnung, Vergleich und Weg. */
+.aus-ergebnis {
+  display: grid;
+  grid-template-columns: fit-content(42%) minmax(0, 1fr);
+  gap: 6px 14px;
+  margin: 0;
+  font-size: 12.5px;
+}
+
+.aus-ergebnis dt {
+  color: var(--matt);
+}
+
+.aus-ergebnis dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Zweite Tafel: Balken der Spitzenwerte mit Stand, Abgrenzung und Quelle darunter. */
+.aus-spitzen {
+  display: grid;
+  gap: 9px;
+}
+
+.aus-spitzen h3 {
+  margin: 0;
+}
+
+.aus-legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 11.5px;
+  color: var(--matt);
+}
+
+.aus-legende span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.aus-legende i {
+  width: 14px;
+  height: 9px;
+  background: var(--akzent);
+}
+
+.aus-legende i.summe {
+  background: var(--blau);
+}
+
+.aus-eintrag {
+  display: grid;
+  gap: 2px;
+}
+
+.aus-spitzen .balken .name {
+  white-space: normal;
+  color: var(--text);
+}
+
+.aus-spitzen .aus-angabe {
+  max-width: none;
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--matt);
+}
+
+.aus-angabe a {
+  color: var(--akzent);
+}
+
+@keyframes aus-fluss {
+  from {
+    stroke-dashoffset: 12;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.ruhig .aus-weg {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aus-weg {
+    animation: none;
+  }
+}
+
+/* Der Vermerk unter den Balken behält seine gedämpfte Farbe, obwohl er in einem Erklärblock steht. */
+.aus-spitzen .vermerk {
+  max-width: none;
+  color: var(--matt);
+}
+
+/* Baustein „Satellit“ */
+
+.umschalter.sat-marken {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.umschalter.sat-marken button + button {
+  border-left-width: 1px;
+  border-left-style: solid;
+  border-left-color: var(--linie);
+}
+
+.umschalter.sat-marken button[aria-pressed="true"] {
+  border-color: var(--akzent);
+}
+
+.sat-bild {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  border: 1px solid var(--linie);
+  background: var(--schwarz);
+}
+
+.sat-bild text {
+  font-size: 12px;
+  fill: var(--text);
+}
+
+.sat-bild .sat-erde {
+  fill: var(--land);
+  stroke: var(--linie);
+}
+
+.sat-bild .sat-faser {
+  fill: none;
+  stroke: var(--akzent);
+  stroke-width: 2.5;
+}
+
+.sat-bild .sat-funk {
+  stroke: var(--bernstein);
+  stroke-width: 1.5;
+}
+
+.sat-bild .sat-funk.sat-blockiert {
+  stroke: var(--rot);
+  stroke-dasharray: 5 4;
+}
+
+.sat-bild .sat-koerper {
+  fill: var(--bernstein);
+}
+
+.sat-bild .sat-fluegel {
+  fill: var(--blau);
+}
+
+.sat-bild .sat-ort {
+  fill: var(--text);
+  stroke: var(--schwarz);
+}
+
+.sat-bild .sat-sat-text {
+  fill: var(--bernstein);
+}
+
+.sat-bild .sat-faser-text {
+  fill: var(--akzent);
+}
+
+.sat-bild .sat-massstab {
+  font-size: 11px;
+  fill: var(--matt);
+}
+
+.vermerk.sat-warnung {
+  border-color: var(--rot);
+  color: var(--text);
+}
+
+.sat-abschnitt {
+  display: grid;
+  gap: 6px;
+}
+
+.sat-abschnitt > * {
+  min-width: 0;
+}
+
+/* Kapazitätsbalken: der lange Name steht über dem Balken statt daneben. */
+.sat-kapazitaet {
+  display: grid;
+  gap: 10px;
+}
+
+.sat-kapazitaet .balken {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 10px;
+}
+
+.sat-kapazitaet .balken .name {
+  grid-column: 1 / -1;
+  white-space: normal;
+}
+
+.vergleich.sat-tabelle {
+  min-width: 0;
+}
+
+.sat-tabelle th + th,
+.sat-tabelle td + td {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Baustein „Inhalte in der Nähe“ */
+
+.inh-bild {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--linie);
+  background: var(--schwarz);
+}
+
+.inh-bild text {
+  font: 11.5px var(--mono);
+  fill: var(--matt);
+}
+
+.inh-bild .inh-name {
+  fill: var(--text);
+}
+
+.inh-bild .inh-zeit {
+  font-size: 13px;
+  fill: var(--akzent);
+}
+
+.inh-knoten {
+  fill: var(--feld);
+  stroke: var(--text);
+  stroke-width: 1.5;
+}
+
+.inh-speicher {
+  stroke: var(--akzent);
+}
+
+.inh-strich {
+  stroke: var(--text);
+  stroke-width: 1.5;
+}
+
+/* Der gewählte Weg läuft, der andere tritt zurück. */
+.inh-weg {
+  fill: none;
+  stroke: var(--akzent);
+  stroke-width: 2;
+}
+
+.inh-aktiv {
+  stroke-dasharray: 7 5;
+  animation: inh-fluss 0.9s linear infinite;
+}
+
+.inh-nachschub {
+  stroke: var(--matt);
+  stroke-width: 1;
+  stroke-dasharray: 1 5;
+}
+
+.inh-bild .inh-matt {
+  opacity: 0.35;
+}
+
+.inh-bild .inh-weg.inh-matt {
+  stroke: var(--matt);
+}
+
+.inh-bild .inh-zeit.inh-matt {
+  fill: var(--matt);
+  opacity: 1;
+}
+
+.inh-balken {
+  display: grid;
+  gap: 6px;
+}
+
+.inh-hinweis {
+  margin: 0;
+  padding: 6px 10px;
+  border-left: 2px solid var(--bernstein);
+  font-size: 12px;
+  color: var(--bernstein);
+}
+
+@keyframes inh-fluss {
+  to {
+    stroke-dashoffset: -12;
+  }
+}
+
+.ruhig .inh-aktiv {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inh-aktiv {
+    animation: none;
+  }
+}
+
+/* Baustein „Glossar“ */
+
+.glo-kopf {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px 18px;
+}
+
+.glo-kopf .eingabe {
+  flex: 0 1 420px;
+  min-width: 0;
+}
+
+.glo-zahl {
+  margin: 0;
+  padding-bottom: 6px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--matt);
+}
+
+.glo-liste {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+  border-top: 1px solid var(--linie);
+  border-left: 1px solid var(--linie);
+}
+
+.glo-eintrag {
+  min-width: 0;
+  padding: 10px 12px 12px;
+  border-right: 1px solid var(--linie);
+  border-bottom: 1px solid var(--linie);
+  transition: background-color 0.4s ease-out;
+}
+
+.glo-eintrag:focus {
+  outline: 0;
+}
+
+/* Der Begriff, zu dem ein Verweis gesprungen ist: getönt und mit Strich links. */
+.glo-eintrag.glo-neu {
+  background: var(--raster);
+  box-shadow: inset 3px 0 0 var(--bernstein);
+}
+
+.glo-eintrag dt {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  color: var(--akzent);
+}
+
+.glo-englisch {
+  margin-left: 6px;
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--matt);
+}
+
+.glo-eintrag dd {
+  max-width: 74ch;
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.glo-eintrag dd.glo-siehe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin-top: 7px;
+  font-size: 12px;
+  color: var(--matt);
+}
+
+.glo-siehe button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  color: var(--akzent);
+}
+
+.glo-siehe button:hover {
+  color: var(--text);
+}
+
+.ruhig .glo-eintrag {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glo-eintrag {
+    transition: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .glo-liste {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- 19. Methodikseite ---------- */
+
+.vergleich.herkunft th:nth-child(1),
+.vergleich.herkunft td:nth-child(1),
+.vergleich.pflege th:nth-child(1),
+.vergleich.pflege td:nth-child(1) {
+  width: 170px;
+}
+
+.vergleich.herkunft th:nth-child(3),
+.vergleich.herkunft td:nth-child(3) {
+  width: 32%;
+}
+
+.vergleich.stand th:nth-child(4),
+.vergleich.stand td:nth-child(4) {
+  width: 150px;
+}
+
+.grenzliste {
+  display: grid;
+  gap: 8px;
+  max-width: 84ch;
+  margin: 0;
+  padding-left: 26px;
+}
+
+.grenzliste li::marker {
+  color: var(--akzent);
+}
